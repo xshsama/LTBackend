@@ -1,6 +1,8 @@
 package com.xsh.learningtracker.service.impl;
 
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final AuthenticationManager authenticationManager;
 
     @Override
     @Transactional
@@ -41,13 +44,19 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String login(LoginRequest request) {
-        User user = findByUsername(request.getUsername());
+        try {
+            // 使用AuthenticationManager进行认证
+            // 直接进行认证，不需要保存authentication变量
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getUsername(),
+                            request.getPassword()));
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            // 认证成功后生成令牌
+            return jwtUtil.generateToken(request.getUsername());
+        } catch (Exception e) {
             throw new BadCredentialsException("用户名或密码错误");
         }
-
-        return jwtUtil.generateToken(user.getUsername());
     }
 
     @Override

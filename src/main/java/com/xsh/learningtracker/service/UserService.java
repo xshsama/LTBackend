@@ -2,7 +2,9 @@ package com.xsh.learningtracker.service;
 
 import com.xsh.learningtracker.dto.LoginRequest;
 import com.xsh.learningtracker.dto.RegisterRequest;
+import com.xsh.learningtracker.dto.UpdateProfileRequest;
 import com.xsh.learningtracker.dto.UserDTO;
+import com.xsh.learningtracker.dto.UserProfileDTO;
 import com.xsh.learningtracker.entity.User;
 
 public interface UserService {
@@ -29,4 +31,21 @@ public interface UserService {
      * @return 用户实体
      */
     User findByUsername(String username);
+
+    /**
+     * 获取当前登录用户的个人信息
+     * 
+     * @param username 用户名
+     * @return 用户个人信息
+     */
+    UserProfileDTO getUserProfile(String username);
+
+    /**
+     * 更新当前登录用户的个人信息
+     * 
+     * @param username 用户名
+     * @param request  个人信息更新请求
+     * @return 更新后的用户个人信息
+     */
+    UserProfileDTO updateUserProfile(String username, UpdateProfileRequest request);
 }

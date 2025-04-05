@@ -10,8 +10,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.xsh.learningtracker.dto.LoginRequest;
 import com.xsh.learningtracker.dto.RegisterRequest;
+import com.xsh.learningtracker.dto.UpdateProfileRequest;
 import com.xsh.learningtracker.dto.UserDTO;
+import com.xsh.learningtracker.dto.UserProfileDTO;
 import com.xsh.learningtracker.entity.User;
+import com.xsh.learningtracker.entity.UserInfo;
+import com.xsh.learningtracker.repository.UserInfoRepository;
 import com.xsh.learningtracker.repository.UserRepository;
 import com.xsh.learningtracker.service.UserService;
 import com.xsh.learningtracker.util.JwtUtil;
@@ -23,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final UserInfoRepository userInfoRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
@@ -45,14 +50,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public String login(LoginRequest request) {
         try {
-            // 使用AuthenticationManager进行认证
-            // 直接进行认证，不需要保存authentication变量
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             request.getUsername(),
                             request.getPassword()));
 
-            // 认证成功后生成令牌
             return jwtUtil.generateToken(request.getUsername());
         } catch (Exception e) {
             throw new BadCredentialsException("用户名或密码错误");
@@ -65,11 +67,60 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new UsernameNotFoundException("用户不存在"));
     }
 
+    @Override
+    public UserProfileDTO getUserProfile(String username) {
+        User user = findByUsername(username);
+        UserInfo userInfo = userInfoRepository.findByUser(user)
+                .orElse(new UserInfo());
+
+        return convertToProfileDTO(user, userInfo);
+    }
+
+    @Override
+    @Transactional
+    public UserProfileDTO updateUserProfile(String username, UpdateProfileRequest request) {
+        User user = findByUsername(username);
+        UserInfo userInfo = userInfoRepository.findByUser(user)
+                .orElse(new UserInfo());
+
+        if (userInfo.getId() == null) {
+            userInfo.setUser(user);
+        }
+
+        userInfo.setNickname(request.getNickname());
+        userInfo.setAvatar(request.getAvatar());
+        userInfo.setBio(request.getBio());
+        userInfo.setBirthday(request.getBirthday());
+        userInfo.setLocation(request.getLocation());
+        userInfo.setEducation(request.getEducation());
+        userInfo.setProfession(request.getProfession());
+
+        UserInfo savedUserInfo = userInfoRepository.save(userInfo);
+
+        return convertToProfileDTO(user, savedUserInfo);
+    }
+
     private UserDTO convertToDTO(User user) {
         UserDTO dto = new UserDTO();
         dto.setId(user.getId());
         dto.setUsername(user.getUsername());
         dto.setCreatedAt(user.getCreatedAt());
+        return dto;
+    }
+
+    private UserProfileDTO convertToProfileDTO(User user, UserInfo userInfo) {
+        UserProfileDTO dto = new UserProfileDTO();
+
+        dto.setUsername(user.getUsername());
+
+        dto.setNickname(userInfo.getNickname());
+        dto.setAvatar(userInfo.getAvatar());
+        dto.setBio(userInfo.getBio());
+        dto.setBirthday(userInfo.getBirthday());
+        dto.setLocation(userInfo.getLocation());
+        dto.setEducation(userInfo.getEducation());
+        dto.setProfession(userInfo.getProfession());
+
         return dto;
     }
 }

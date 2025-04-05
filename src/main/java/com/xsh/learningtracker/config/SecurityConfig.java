@@ -70,8 +70,11 @@ public class SecurityConfig {
                 // 在UsernamePasswordAuthenticationFilter之前添加JWT过滤器
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll() // Allow access to /api/auth/** endpoints
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow OPTIONS for CORS preflight
+                        .requestMatchers("/api/auth/**").permitAll() // 允许访问/api/auth/**端点
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // 允许OPTIONS请求用于CORS预检
+                        // 添加个人资料API的安全配置
+                        .requestMatchers(HttpMethod.GET, "/api/profile").authenticated() // 获取个人资料需要认证
+                        .requestMatchers(HttpMethod.PUT, "/api/profile").authenticated() // 更新个人资料需要认证
                         .anyRequest().authenticated())
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)

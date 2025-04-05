@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.xsh.learningtracker.dto.LoginRequest;
+import com.xsh.learningtracker.dto.LoginResponseDTO;
 import com.xsh.learningtracker.dto.RegisterRequest;
 import com.xsh.learningtracker.dto.UpdateProfileRequest;
 import com.xsh.learningtracker.dto.UserDTO;
@@ -48,14 +49,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String login(LoginRequest request) {
+    public LoginResponseDTO login(LoginRequest request) {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             request.getUsername(),
                             request.getPassword()));
 
-            return jwtUtil.generateToken(request.getUsername());
+            String token = jwtUtil.generateToken(request.getUsername());
+
+            // 获取用户的个人信息
+            UserProfileDTO userProfile = getUserProfile(request.getUsername());
+
+            // 返回包含令牌和用户信息的响应
+            return new LoginResponseDTO(token, userProfile);
         } catch (Exception e) {
             throw new BadCredentialsException("用户名或密码错误");
         }

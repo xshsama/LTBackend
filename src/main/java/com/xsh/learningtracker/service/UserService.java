@@ -1,6 +1,7 @@
 package com.xsh.learningtracker.service;
 
 import com.xsh.learningtracker.dto.LoginRequest;
+import com.xsh.learningtracker.dto.LoginResponseDTO;
 import com.xsh.learningtracker.dto.RegisterRequest;
 import com.xsh.learningtracker.dto.UpdateProfileRequest;
 import com.xsh.learningtracker.dto.UserDTO;
@@ -20,9 +21,9 @@ public interface UserService {
      * 用户登录
      * 
      * @param request 登录请求
-     * @return JWT token
+     * @return 登录响应，包含JWT token和用户信息
      */
-    String login(LoginRequest request);
+    LoginResponseDTO login(LoginRequest request);
 
     /**
      * 根据用户名查找用户

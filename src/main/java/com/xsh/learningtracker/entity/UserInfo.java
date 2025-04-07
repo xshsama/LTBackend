@@ -27,6 +27,7 @@ public class UserInfo {
     private String bio;
     private LocalDate birthday;
     private String location;
+    private LocalDate createdAt;
     private String education;
     private String profession;
 }

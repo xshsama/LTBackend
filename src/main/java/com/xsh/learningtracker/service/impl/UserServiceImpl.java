@@ -41,10 +41,17 @@ public class UserServiceImpl implements UserService {
         }
 
         User user = new User();
+        UserInfo userInfo = new UserInfo();
+        userInfo.setCreatedAt(java.time.Instant.ofEpochMilli(System.currentTimeMillis())
+                .atZone(java.time.ZoneId.systemDefault())
+                .toLocalDate());
+
         user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         User savedUser = userRepository.save(user);
+        userInfoRepository.save(userInfo);
+
         return convertToDTO(savedUser);
     }
 

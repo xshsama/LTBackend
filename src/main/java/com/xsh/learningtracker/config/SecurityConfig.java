@@ -76,6 +76,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/profile").permitAll() // 获取个人资料不需要强制认证
                         .requestMatchers(HttpMethod.PUT, "/api/profile").authenticated() // 更新个人资料需要认证
                         .requestMatchers(HttpMethod.POST, "/api/avatar/upload/**").authenticated() // 上传图片需要认证
+                        .requestMatchers(HttpMethod.POST, "/api/user/password").authenticated() // 修改密码需要认证
                         .anyRequest().authenticated())
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)

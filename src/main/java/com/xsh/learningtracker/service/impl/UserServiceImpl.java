@@ -3,6 +3,8 @@ package com.xsh.learningtracker.service.impl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -11,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.xsh.learningtracker.dto.LoginRequest;
 import com.xsh.learningtracker.dto.LoginResponseDTO;
 import com.xsh.learningtracker.dto.RegisterRequest;
+import com.xsh.learningtracker.dto.UpdatePasswordRequest;
 import com.xsh.learningtracker.dto.UpdateProfileRequest;
 import com.xsh.learningtracker.dto.UserDTO;
 import com.xsh.learningtracker.dto.UserProfileDTO;
@@ -117,6 +120,34 @@ public class UserServiceImpl implements UserService {
         UserInfo savedUserInfo = userInfoRepository.save(userInfo);
 
         return convertToProfileDTO(user, savedUserInfo);
+    }
+
+    @Override
+    @Transactional
+    public boolean updatePassword(@AuthenticationPrincipal UserDetails userDetails, UpdatePasswordRequest request) {
+        try {
+            // 获取当前用户
+            String username = userDetails.getUsername();
+            User user = findByUsername(username);
+
+            // 验证当前密码是否正确
+            if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+                return false; // 当前密码不匹配
+            }
+
+            // 验证新密码与确认密码是否一致
+            if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+                return false; // 新密码与确认密码不一致
+            }
+
+            // 更新密码
+            user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+            userRepository.save(user);
+
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private UserDTO convertToDTO(User user) {

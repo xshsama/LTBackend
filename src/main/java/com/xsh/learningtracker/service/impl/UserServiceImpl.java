@@ -41,15 +41,20 @@ public class UserServiceImpl implements UserService {
         }
 
         User user = new User();
+        user.setUsername(request.getUsername());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        // 先保存User实体
+        User savedUser = userRepository.save(user);
+
+        // 创建UserInfo并设置关联
         UserInfo userInfo = new UserInfo();
+        userInfo.setUser(savedUser); // 设置user关联，这是关键步骤
         userInfo.setCreatedAt(java.time.Instant.ofEpochMilli(System.currentTimeMillis())
                 .atZone(java.time.ZoneId.systemDefault())
                 .toLocalDate());
 
-        user.setUsername(request.getUsername());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-
-        User savedUser = userRepository.save(user);
+        // 保存UserInfo
         userInfoRepository.save(userInfo);
 
         return convertToDTO(savedUser);
@@ -134,6 +139,9 @@ public class UserServiceImpl implements UserService {
         dto.setLocation(userInfo.getLocation());
         dto.setEducation(userInfo.getEducation());
         dto.setProfession(userInfo.getProfession());
+
+        // 设置用户注册时间
+        dto.setCreatedAt(userInfo.getCreatedAt());
 
         return dto;
     }

@@ -14,4 +14,5 @@ public class UserProfileDTO {
     private String location; // 来自 UserInfo
     private String education; // 来自 UserInfo
     private String profession; // 来自 UserInfo
+    private LocalDate createdAt; // 用户的注册时间
 }

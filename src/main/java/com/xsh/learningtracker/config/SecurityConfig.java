@@ -72,8 +72,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll() // 允许访问/api/auth/**端点
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // 允许OPTIONS请求用于CORS预检
-                        // 添加个人资料API的安全配置
-                        .requestMatchers(HttpMethod.GET, "/api/profile").authenticated() // 获取个人资料需要认证
+                        // 添加个人资料API的安全配置 - 修改为permitAll()让未设置用户信息时不会报错
+                        .requestMatchers(HttpMethod.GET, "/api/profile").permitAll() // 获取个人资料不需要强制认证
                         .requestMatchers(HttpMethod.PUT, "/api/profile").authenticated() // 更新个人资料需要认证
                         .anyRequest().authenticated())
                 .httpBasic(AbstractHttpConfigurer::disable)

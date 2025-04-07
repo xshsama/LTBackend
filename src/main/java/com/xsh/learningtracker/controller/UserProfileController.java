@@ -29,14 +29,21 @@ public class UserProfileController {
 
     /**
      * 获取当前登录用户的个人资料
+     * 如果用户未登录，则返回空的个人资料
      * 
-     * @param userDetails 当前登录用户信息
+     * @param userDetails 当前登录用户信息（可能为null）
      * @return 用户个人资料
      */
     @GetMapping
     public ResponseEntity<ApiResponse<UserProfileDTO>> getProfile(
             @AuthenticationPrincipal UserDetails userDetails) {
 
+        // 用户未登录，返回提示信息
+        if (userDetails == null) {
+            return ResponseEntity.ok(ApiResponse.success("用户未登录", null));
+        }
+
+        // 用户已登录，返回个人资料
         String username = userDetails.getUsername();
         UserProfileDTO profile = userService.getUserProfile(username);
 

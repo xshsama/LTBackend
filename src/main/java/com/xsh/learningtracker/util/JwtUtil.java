@@ -30,6 +30,35 @@ public class JwtUtil {
                 .compact();
     }
 
+    // 添加刷新令牌的方法
+    public String refreshToken(String token) {
+        // 从旧令牌中提取用户名
+        String username = getUsernameFromToken(token);
+        // 生成新令牌
+        return generateToken(username);
+    }
+
+    // 获取令牌过期时间
+    public Date getExpirationDateFromToken(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(Keys.hmacShaKeyFor(secret.getBytes()))
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+
+        return claims.getExpiration();
+    }
+
+    // 检查令牌是否即将过期（比如还有5分钟就过期）
+    public boolean isTokenAboutToExpire(String token) {
+        try {
+            Date expiration = getExpirationDateFromToken(token);
+            return expiration.getTime() - System.currentTimeMillis() < 300000; // 小于5分钟
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public String getUsernameFromToken(String token) {
         Claims claims = Jwts.parser()
                 .verifyWith(Keys.hmacShaKeyFor(secret.getBytes()))

@@ -1,5 +1,7 @@
 package com.xsh.learningtracker.service.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,6 +31,8 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     private final UserRepository userRepository;
     private final UserInfoRepository userInfoRepository;
@@ -91,33 +95,50 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserProfileDTO getUserProfile(String username) {
+
+        logger.info("正在获取用户 {} 的个人资料", username);
         User user = findByUsername(username);
         UserInfo userInfo = userInfoRepository.findByUser(user)
                 .orElse(new UserInfo());
 
+        // 将User和UserInfo转换为UserProfileDTO
         return convertToProfileDTO(user, userInfo);
     }
 
     @Override
     @Transactional
     public UserProfileDTO updateUserProfile(String username, UpdateProfileRequest request) {
+        logger.info("正在更新用户 {} 的个人资料", username);
+        logger.debug("更新请求数据: {}", request);
+
         User user = findByUsername(username);
         UserInfo userInfo = userInfoRepository.findByUser(user)
                 .orElse(new UserInfo());
 
         if (userInfo.getId() == null) {
             userInfo.setUser(user);
+            userInfo.setCreatedAt(java.time.LocalDate.now());
+            logger.info("为用户 {} 创建新的个人资料", username);
         }
 
-        userInfo.setNickname(request.getNickname());
-        userInfo.setAvatar(request.getAvatar());
-        userInfo.setBio(request.getBio());
-        userInfo.setBirthday(request.getBirthday());
-        userInfo.setLocation(request.getLocation());
-        userInfo.setEducation(request.getEducation());
-        userInfo.setProfession(request.getProfession());
+        // 只更新非null字段
+        if (request.getNickname() != null)
+            userInfo.setNickname(request.getNickname());
+        if (request.getAvatar() != null)
+            userInfo.setAvatar(request.getAvatar());
+        if (request.getBio() != null)
+            userInfo.setBio(request.getBio());
+        if (request.getBirthday() != null)
+            userInfo.setBirthday(request.getBirthday());
+        if (request.getLocation() != null)
+            userInfo.setLocation(request.getLocation());
+        if (request.getEducation() != null)
+            userInfo.setEducation(request.getEducation());
+        if (request.getProfession() != null)
+            userInfo.setProfession(request.getProfession());
 
         UserInfo savedUserInfo = userInfoRepository.save(userInfo);
+        logger.info("用户 {} 的个人资料已更新", username);
 
         return convertToProfileDTO(user, savedUserInfo);
     }
@@ -162,8 +183,8 @@ public class UserServiceImpl implements UserService {
         UserProfileDTO dto = new UserProfileDTO();
 
         dto.setUsername(user.getUsername());
-
-        dto.setNickname(userInfo.getNickname());
+        // 避免设置null值
+        dto.setNickname(userInfo.getNickname() != null ? userInfo.getNickname() : user.getUsername());
         dto.setAvatar(userInfo.getAvatar());
         dto.setBio(userInfo.getBio());
         dto.setBirthday(userInfo.getBirthday());
@@ -171,8 +192,13 @@ public class UserServiceImpl implements UserService {
         dto.setEducation(userInfo.getEducation());
         dto.setProfession(userInfo.getProfession());
 
-        // 设置用户注册时间
-        dto.setCreatedAt(userInfo.getCreatedAt());
+        // 设置用户注册时间，并处理类型转换
+        if (userInfo.getCreatedAt() != null) {
+            dto.setCreatedAt(userInfo.getCreatedAt());
+        } else if (user.getCreatedAt() != null) {
+            // 将User的LocalDateTime类型转换为LocalDate类型
+            dto.setCreatedAt(user.getCreatedAt().toLocalDate());
+        }
 
         return dto;
     }

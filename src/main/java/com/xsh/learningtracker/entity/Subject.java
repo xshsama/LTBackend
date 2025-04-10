@@ -44,6 +44,12 @@ public class Subject {
     @OneToMany(mappedBy = "subject")
     private Set<Goal> goals = new HashSet<>();
 
+    public Set<Tag> getTags() {
+        return goals.stream()
+                .flatMap(goal -> goal.getTags().stream())
+                .collect(java.util.stream.Collectors.toSet());
+    }
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

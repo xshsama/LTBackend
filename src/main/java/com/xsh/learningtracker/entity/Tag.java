@@ -33,11 +33,5 @@ public class Tag {
     private User user;
 
     @ManyToMany(mappedBy = "tags")
-    private Set<Subject> subjects = new HashSet<>();
-
-    @ManyToMany(mappedBy = "tags")
-    private Set<Goal> goals = new HashSet<>();
-
-    @ManyToMany(mappedBy = "tags")
     private Set<Task> tasks = new HashSet<>();
 }

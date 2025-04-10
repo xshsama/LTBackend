@@ -71,6 +71,12 @@ public class Goal {
     @OneToMany(mappedBy = "goal")
     private Set<Task> tasks = new HashSet<>();
 
+    public Set<Tag> getTags() {
+        return tasks.stream()
+                .flatMap(task -> task.getTags().stream())
+                .collect(java.util.stream.Collectors.toSet());
+    }
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -83,7 +89,7 @@ public class Goal {
     }
 
     public enum Priority {
-        LOW, MEDIUM, HIGH
+        LOW, MEDIUM, HIGH, URGENT
     }
 
     public enum Status {

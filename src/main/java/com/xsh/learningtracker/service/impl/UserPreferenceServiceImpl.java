@@ -25,7 +25,7 @@ public class UserPreferenceServiceImpl implements UserPreferenceService {
     private final UserRepository userRepository;
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public UserPreferenceDTO getUserPreferences(String username) {
         logger.debug("正在获取用户 {} 的偏好设置", username);
 

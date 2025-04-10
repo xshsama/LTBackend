@@ -148,22 +148,19 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                         return;
                     }
                 } else {
-                    // 令牌未过期，进行正常验证
+                    // 令牌未过期或已经自动刷新，进行正常验证
                     // 加载用户详情
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                    // 验证JWT令牌
-                    if (jwtUtil.validateToken(jwt)) {
-                        // 创建认证令牌
-                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                                userDetails, null, userDetails.getAuthorities());
+                    // 创建认证令牌
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
 
-                        // 设置认证详情
-                        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    // 设置认证详情
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                        // 在SecurityContext中设置认证信息
-                        SecurityContextHolder.getContext().setAuthentication(authToken);
-                    }
+                    // 在SecurityContext中设置认证信息
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             } catch (Exception e) {
                 logger.error("令牌处理过程中发生错误: {}", e.getMessage());

@@ -50,9 +50,11 @@ public class UserPreference {
     @Column(name = "week_start_day")
     private Integer weekStartDay = 1;
 
-    // 语言设置
+    // 语言偏好
     @Column(name = "language")
     private String language = "zh-CN";
+
+    // 语言设置 (removed duplicate declaration)
 
     // 隐私设置
     @Column(name = "profile_visibility")

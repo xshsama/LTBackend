@@ -13,8 +13,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -22,25 +23,24 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "goals")
-public class Goal {
-
+@Table(name = "tasks")
+public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne
-    @JoinColumn(name = "subject_id", nullable = false)
-    private Subject subject;
-
     @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "deadline")
-    private LocalDate deadline;
+    @Column(name = "description")
+    private String description;
 
-    @Column(name = "status")
-    private Status status;
+    @Column(name = "due_date")
+    private LocalDate dueDate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private Status status = Status.NOT_STARTED;
 
     @Column(name = "completion_date")
     private LocalDate completionDate;
@@ -49,14 +49,11 @@ public class Goal {
     @Column(name = "priority", nullable = false)
     private Priority priority = Priority.MEDIUM;
 
-    @Column(name = "progress")
-    private Integer progress = 0;
+    @Column(name = "estimated_time_minutes")
+    private Integer estimatedTimeMinutes;
 
-    @Column(name = "expected_hours")
-    private Integer expectedHours;
-
-    @Column(name = "actual_hours")
-    private Integer actualHours = 0;
+    @Column(name = "actual_time_minutes")
+    private Integer actualTimeMinutes = 0;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -65,11 +62,12 @@ public class Goal {
     private LocalDateTime updatedAt;
 
     @ManyToOne
-    @JoinColumn(name = "category_id")
-    private Category category;
+    @JoinColumn(name = "goal_id", nullable = false)
+    private Goal goal;
 
-    @OneToMany(mappedBy = "goal")
-    private Set<Task> tasks = new HashSet<>();
+    @ManyToMany
+    @JoinTable(name = "task_tags", joinColumns = @JoinColumn(name = "task_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    private Set<Tag> tags = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {
@@ -82,11 +80,11 @@ public class Goal {
         updatedAt = LocalDateTime.now();
     }
 
-    public enum Priority {
-        LOW, MEDIUM, HIGH
+    public enum Status {
+        NOT_STARTED, IN_PROGRESS, COMPLETED, OVERDUE, CANCELLED
     }
 
-    public enum Status {
-        ONGOING, COMPLETED, EXPIRED, NO_STARTED
+    public enum Priority {
+        LOW, MEDIUM, HIGH, URGENT
     }
 }

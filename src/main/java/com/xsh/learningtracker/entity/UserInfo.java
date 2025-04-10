@@ -22,12 +22,27 @@ public class UserInfo {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @jakarta.persistence.Column(name = "nickname")
     private String nickname;
+
+    @jakarta.persistence.Column(name = "avatar")
     private String avatar;
+
+    @jakarta.persistence.Column(name = "bio", columnDefinition = "TEXT")
     private String bio;
+
+    @jakarta.persistence.Column(name = "birthday")
     private LocalDate birthday;
+
+    @jakarta.persistence.Column(name = "location")
     private String location;
+
+    @jakarta.persistence.Column(name = "created_at")
     private LocalDate createdAt;
+
+    @jakarta.persistence.Column(name = "education")
     private String education;
+
+    @jakarta.persistence.Column(name = "profession")
     private String profession;
 }

@@ -32,4 +32,8 @@ public interface TaskService {
     boolean existsById(Integer id);
 
     void updateProgress(Integer id, Integer actualTimeMinutes);
+
+    Task updateTaskStatus(Integer id, Task.Status status);
+
+    Task updateActualTime(Integer id, Integer actualTimeMinutes);
 }

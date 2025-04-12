@@ -120,4 +120,32 @@ public class TaskServiceImpl implements TaskService {
         }
         taskRepository.save(task);
     }
+
+    @Override
+    public Task updateTaskStatus(Integer id, Task.Status status) {
+        Task task = getTaskById(id);
+        task.setStatus(status);
+
+        // 如果任务状态变为已完成，设置完成日期
+        if (status == Task.Status.COMPLETED) {
+            task.setCompletionDate(LocalDate.now());
+        } else {
+            task.setCompletionDate(null);
+        }
+
+        return taskRepository.save(task);
+    }
+
+    @Override
+    public Task updateActualTime(Integer id, Integer actualTimeMinutes) {
+        Task task = getTaskById(id);
+        task.setActualTimeMinutes(actualTimeMinutes);
+
+        // 如果实际时间大于0，任务状态改为进行中
+        if (actualTimeMinutes > 0 && task.getStatus() == Task.Status.NOT_STARTED) {
+            task.setStatus(Task.Status.IN_PROGRESS);
+        }
+
+        return taskRepository.save(task);
+    }
 }

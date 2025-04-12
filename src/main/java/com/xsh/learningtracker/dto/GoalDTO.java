@@ -74,4 +74,9 @@ public class GoalDTO {
             this.completionRate = total > 0 ? (completed * 100.0) / total : 0.0;
         }
     }
+
+    @Data
+    public static class UpdateStatusRequest {
+        private Goal.Status status;
+    }
 }

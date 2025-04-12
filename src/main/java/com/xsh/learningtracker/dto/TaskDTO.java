@@ -48,11 +48,6 @@ public class TaskDTO {
     }
 
     @Data
-    public static class UpdateTaskProgressRequest {
-        private Integer actualTimeMinutes;
-    }
-
-    @Data
     public static class TaskProgress {
         private Double completionPercentage;
         private Integer totalTimeSpent;
@@ -73,5 +68,15 @@ public class TaskDTO {
                     ? java.time.Period.between(today, dueDate).getDays()
                     : null;
         }
+    }
+
+    @Data
+    public static class UpdateStatusRequest {
+        private Task.Status status;
+    }
+
+    @Data
+    public static class UpdateTimeRequest {
+        private Integer actualTimeMinutes;
     }
 }

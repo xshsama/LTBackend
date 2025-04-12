@@ -93,6 +93,6 @@ public class Goal {
     }
 
     public enum Status {
-        ONGOING, COMPLETED, EXPIRED, NO_STARTED
+        ONGOING, COMPLETED, EXPIRED, NOT_STARTED
     }
 }

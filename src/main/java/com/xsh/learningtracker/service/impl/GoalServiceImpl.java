@@ -28,7 +28,7 @@ public class GoalServiceImpl implements GoalService {
                 .orElseThrow(() -> new RuntimeException("Subject not found with id: " + subjectId));
         goal.setSubject(subject);
         if (goal.getStatus() == null) {
-            goal.setStatus(Goal.Status.NO_STARTED);
+            goal.setStatus(Goal.Status.NOT_STARTED);
         }
         return goalRepository.save(goal);
     }

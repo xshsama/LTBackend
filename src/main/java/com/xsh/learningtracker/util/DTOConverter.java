@@ -4,6 +4,7 @@ import java.util.stream.Collectors;
 
 import com.xsh.learningtracker.dto.CategoryDTO;
 import com.xsh.learningtracker.dto.GoalDTO;
+import com.xsh.learningtracker.dto.GoalDTO.UpdateGoalRequest;
 import com.xsh.learningtracker.dto.SubjectDTO;
 import com.xsh.learningtracker.dto.TaskDTO;
 import com.xsh.learningtracker.entity.Category;
@@ -94,6 +95,25 @@ public class DTOConverter {
         return dto;
     }
 
+    public static GoalDTO toGoalDTO(UpdateGoalRequest request) {
+        if (request == null)
+            return null;
+        GoalDTO dto = new GoalDTO();
+        // 只设置UpdateGoalRequest中存在的字段
+        dto.setTitle(request.getTitle());
+        dto.setDeadline(request.getDeadline());
+        dto.setStatus(request.getStatus());
+        dto.setPriority(request.getPriority());
+        dto.setExpectedHours(request.getExpectedHours());
+        dto.setActualHours(request.getActualHours());
+        dto.setCategoryId(request.getCategoryId());
+
+        // 直接设置标签，因为getTags()返回的是List<String>
+        dto.setTags(request.getTags());
+
+        return dto;
+    }
+
     // Task 转换方法
     public static TaskDTO toTaskDTO(Task task) {
         if (task == null)
@@ -151,7 +171,7 @@ public class DTOConverter {
         goal.setExpectedHours(request.getExpectedHours());
         goal.setSubject(subject);
         goal.setCategory(category);
-        goal.setStatus(Goal.Status.NO_STARTED);
+        goal.setStatus(Goal.Status.NOT_STARTED);
         goal.setProgress(0);
         return goal;
     }
@@ -168,5 +188,27 @@ public class DTOConverter {
         subject.setTitle(request.getTitle());
         subject.setUser(user);
         return subject;
+    }
+
+    public static Goal toGoal(GoalDTO.UpdateGoalRequest request) {
+        Goal goal = new Goal();
+        goal.setTitle(request.getTitle());
+        goal.setDeadline(request.getDeadline());
+        goal.setStatus(request.getStatus());
+        goal.setPriority(request.getPriority());
+        goal.setExpectedHours(request.getExpectedHours());
+        goal.setActualHours(request.getActualHours());
+        return goal;
+    }
+
+    public static Task toTask(TaskDTO.UpdateTaskRequest request) {
+        Task task = new Task();
+        task.setTitle(request.getTitle());
+        task.setDescription(request.getDescription());
+        task.setDueDate(request.getDueDate());
+        task.setStatus(request.getStatus());
+        task.setPriority(request.getPriority());
+        task.setEstimatedTimeMinutes(request.getEstimatedTimeMinutes());
+        return task;
     }
 }

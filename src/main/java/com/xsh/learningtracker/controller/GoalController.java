@@ -20,11 +20,15 @@ import com.xsh.learningtracker.dto.GoalDTO;
 import com.xsh.learningtracker.entity.Goal;
 import com.xsh.learningtracker.service.GoalService;
 import com.xsh.learningtracker.service.SubjectService;
+import com.xsh.learningtracker.service.UserService;
 import com.xsh.learningtracker.util.DTOConverter;
 
 @RestController
 @RequestMapping("/api/goals")
 public class GoalController {
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private GoalService goalService;
@@ -34,7 +38,8 @@ public class GoalController {
 
     @GetMapping
     public ResponseEntity<List<GoalDTO>> getAllGoals(Authentication authentication) {
-        Integer userId = Integer.parseInt(authentication.getName());
+        String username = authentication.getName();
+        Integer userId = userService.findByUsername(username).getId();
         List<Goal> goals = goalService.getGoalsByUserIdOrderByCreatedAtDesc(userId);
         List<GoalDTO> goalDTOs = goals.stream()
                 .map(goal -> DTOConverter.toGoalDTO(goal))

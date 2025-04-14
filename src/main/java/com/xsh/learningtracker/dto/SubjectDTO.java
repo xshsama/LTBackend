@@ -27,7 +27,7 @@ public class SubjectDTO {
     @Data
     public static class CreateSubjectRequest {
         private String title;
-        private Long userId;
+        private Integer userId;
     }
 
     @Data

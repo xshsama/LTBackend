@@ -14,7 +14,7 @@ import com.xsh.learningtracker.entity.User;
 public interface SubjectRepository extends JpaRepository<Subject, Integer> {
     List<Subject> findByUser(User user);
 
-    List<Subject> findByUserIdOrderByCreatedAtDesc(Long userId);
+    List<Subject> findByUserIdOrderByCreatedAtDesc(Integer userId);
 
     @Query("SELECT DISTINCT c.subject FROM Category c WHERE c.id = :categoryId")
     Subject findByCategory(@Param("categoryId") Integer categoryId);

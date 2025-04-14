@@ -23,6 +23,7 @@ import com.xsh.learningtracker.entity.Subject;
 import com.xsh.learningtracker.entity.Task;
 import com.xsh.learningtracker.service.CategoryService;
 import com.xsh.learningtracker.service.SubjectService;
+import com.xsh.learningtracker.service.UserService;
 import com.xsh.learningtracker.util.DTOConverter;
 
 @RestController
@@ -35,9 +36,13 @@ public class SubjectController {
     @Autowired
     private CategoryService categoryService;
 
+    @Autowired
+    private UserService userService;
+
     @GetMapping
     public ResponseEntity<List<SubjectDTO>> getAllSubjects(Authentication authentication) {
-        Long userId = Long.parseLong(authentication.getName());
+        String username = authentication.getName();
+        Integer userId = userService.findByUsername(username).getId();
         List<Subject> subjects = subjectService.getSubjectsByUserId(userId);
         List<SubjectDTO> subjectDTOs = subjects.stream()
                 .map(DTOConverter::toSubjectDTO)
@@ -55,7 +60,8 @@ public class SubjectController {
     public ResponseEntity<SubjectDTO> createSubject(
             @RequestBody SubjectDTO.CreateSubjectRequest request,
             Authentication authentication) {
-        Long userId = Long.parseLong(authentication.getName());
+        String username = authentication.getName();
+        Integer userId = userService.findByUsername(username).getId();
         Subject subject = DTOConverter.toSubject(request, null); // 用户会在service层设置
         Subject createdSubject = subjectService.createSubject(subject, userId);
         return ResponseEntity.ok(DTOConverter.toSubjectDTO(createdSubject));

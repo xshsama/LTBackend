@@ -24,7 +24,7 @@ public class SubjectServiceImpl implements SubjectService {
     private UserRepository userRepository;
 
     @Override
-    public Subject createSubject(Subject subject, Long userId) {
+    public Subject createSubject(Subject subject, Integer userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserException("User not found with id: " + userId));
         subject.setUser(user);
@@ -56,7 +56,7 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     @Override
-    public List<Subject> getSubjectsByUserId(Long userId) {
+    public List<Subject> getSubjectsByUserId(Integer userId) {
         return subjectRepository.findByUserIdOrderByCreatedAtDesc(userId);
     }
 

@@ -147,7 +147,7 @@ public class DTOConverter {
         CategoryDTO dto = new CategoryDTO();
         dto.setId(category.getId());
         dto.setName(category.getName());
-        dto.setSubjectId(category.getSubject().getId());
+        dto.setSubjectId(category.getSubjectId());
         return dto;
     }
 
@@ -179,7 +179,7 @@ public class DTOConverter {
     public static Category toCategory(CategoryDTO.CreateCategoryRequest request, Subject subject) {
         Category category = new Category();
         category.setName(request.getName());
-        category.setSubject(subject);
+        category.setSubjectId(subject.getId());
         return category;
     }
 

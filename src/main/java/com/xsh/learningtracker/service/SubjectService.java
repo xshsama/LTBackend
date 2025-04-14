@@ -6,7 +6,7 @@ import com.xsh.learningtracker.entity.Subject;
 import com.xsh.learningtracker.entity.User;
 
 public interface SubjectService {
-    Subject createSubject(Subject subject, Long userId);
+    Subject createSubject(Subject subject, Integer userId);
 
     Subject updateSubject(Integer id, Subject subject);
 
@@ -16,7 +16,7 @@ public interface SubjectService {
 
     List<Subject> getSubjectsByUser(User user);
 
-    List<Subject> getSubjectsByUserId(Long userId);
+    List<Subject> getSubjectsByUserId(Integer userId);
 
     boolean existsById(Integer id);
 

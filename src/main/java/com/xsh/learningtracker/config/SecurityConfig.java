@@ -78,9 +78,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/avatar/upload/**").authenticated() // 上传图片需要认证
                         .requestMatchers(HttpMethod.POST, "/api/user/password").authenticated() // 修改密码需要认证
                         .requestMatchers("/api/user/preferences/**").authenticated() // 用户偏好设置相关的所有请求都需要认证
-                        .requestMatchers("/api/subjects/**").authenticated() // 学习主题相关的所有请求都需要认证
-                        .requestMatchers("/api/tags/**").authenticated() // 标签相关的所有请求都需要认证
-                        .requestMatchers("/api/categories/**").authenticated() // 分类相关的所有请求都需要认证
+                        .requestMatchers(HttpMethod.GET, "/api/subjects/**").permitAll() // 允许获取学习主题
+                        .requestMatchers(HttpMethod.POST, "/api/subjects/**").authenticated() // 修改学习主题需要认证
+                        .requestMatchers(HttpMethod.GET, "/api/tags/**").permitAll() // 允许获取标签
+                        .requestMatchers(HttpMethod.POST, "/api/tags/**").authenticated() // 修改标签需要认证
+                        .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll() // 允许获取分类
+                        .requestMatchers(HttpMethod.POST, "/api/categories/**").authenticated() // 修改分类需要认证
                         .anyRequest().authenticated())
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)

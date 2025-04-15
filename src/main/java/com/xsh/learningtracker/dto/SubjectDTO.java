@@ -20,7 +20,7 @@ public class SubjectDTO {
     private Double completionRate;
 
     // 关联数据
-    private List<CategoryDTO> categories;
+    private CategoryDTO category;
     private List<String> tags;
 
     // 用于创建和更新的内部类
@@ -28,6 +28,7 @@ public class SubjectDTO {
     public static class CreateSubjectRequest {
         private String title;
         private Integer userId;
+        private Integer categoryId;
     }
 
     @Data

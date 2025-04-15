@@ -39,10 +39,11 @@ public class Subject {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "subject")
-    private Set<Category> categories = new HashSet<>();
-
-    @OneToMany(mappedBy = "subject")
     private Set<Goal> goals = new HashSet<>();
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     public Set<Tag> getTags() {
         return goals.stream()

@@ -46,9 +46,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         // 排除不需要JWT验证的路径（如登录、注册、刷新令牌等）
         final String requestPath = request.getServletPath();
-        if (requestPath.contains("/api/auth/login") ||
-                requestPath.contains("/api/auth/register") ||
-                requestPath.contains("/api/auth/refresh-token")) {
+        logger.debug("当前请求路径: {}", requestPath);
+
+        // 使用精确的路径匹配，而不是contains
+        if (requestPath.equals("/api/auth/login") ||
+                requestPath.equals("/api/auth/register") ||
+                requestPath.equals("/api/auth/refresh-token") ||
+                requestPath.startsWith("/api/auth/")) {
+            logger.debug("跳过JWT验证，路径: {}", requestPath);
             filterChain.doFilter(request, response);
             return;
         }
@@ -111,7 +116,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 return;
             }
         } else {
-            logger.warn("未找到JWT令牌或格式不正确");
+            // 对于没有Authorization头或格式不正确的请求，只记录debug级别日志
+            logger.debug("请求没有JWT令牌或格式不正确: {}", requestPath);
+            // 继续过滤器链，让Spring Security决定是否允许访问
             filterChain.doFilter(request, response);
             return;
         }

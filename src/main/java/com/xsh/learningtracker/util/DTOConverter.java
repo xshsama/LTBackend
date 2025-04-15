@@ -43,16 +43,15 @@ public class DTOConverter {
             dto.setCompletionRate((dto.getCompletedTasks() * 100.0) / dto.getTotalTasks());
         }
 
-        // 转换分类列表
-        dto.setCategories(subject.getCategories().stream()
-                .map(DTOConverter::toCategoryDTO)
-                .collect(Collectors.toList()));
-
         // 收集所有标签
         dto.setTags(subject.getTags().stream()
                 .map(Tag::getName)
                 .collect(Collectors.toList()));
 
+        // 设置学科的分类
+        if (subject.getCategory() != null) {
+            dto.setCategory(toCategoryDTO(subject.getCategory()));
+        }
         return dto;
     }
 
@@ -179,7 +178,12 @@ public class DTOConverter {
     public static Category toCategory(CategoryDTO.CreateCategoryRequest request, Subject subject) {
         Category category = new Category();
         category.setName(request.getName());
-        category.setSubjectId(subject.getId());
+
+        // 允许 subject 为 null，只有在 subject 不为 null 时才设置 subjectId
+        if (subject != null) {
+            category.setSubjectId(subject.getId());
+            category.setSubject(subject);
+        }
         return category;
     }
 

@@ -39,10 +39,11 @@ public class Subject {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "subject")
-    private Set<Category> categories = new HashSet<>();
-
-    @OneToMany(mappedBy = "subject")
     private Set<Goal> goals = new HashSet<>();
+
+    @jakarta.persistence.ManyToMany
+    @jakarta.persistence.JoinTable(name = "subject_categories", joinColumns = @JoinColumn(name = "subject_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
+    private Set<Category> categories = new HashSet<>();
 
     public Set<Tag> getTags() {
         return goals.stream()

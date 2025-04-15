@@ -1,5 +1,7 @@
 package com.xsh.learningtracker.entity;
 
+import java.util.Set;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -29,10 +31,15 @@ public class Category {
 
     private String description;
 
+    // 保留原始的单一关系支持，以保持向后兼容性
     @Column(name = "subject_id", insertable = false, updatable = false)
     private Integer subjectId;
 
-    @ManyToOne
-    @JoinColumn(name = "subject_id")
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "subject_id", nullable = true)
     private Subject subject;
+
+    // 新增多对多关系
+    @jakarta.persistence.ManyToMany(mappedBy = "categories")
+    private Set<Subject> subjects = new java.util.HashSet<>();
 }

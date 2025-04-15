@@ -179,7 +179,12 @@ public class DTOConverter {
     public static Category toCategory(CategoryDTO.CreateCategoryRequest request, Subject subject) {
         Category category = new Category();
         category.setName(request.getName());
-        category.setSubjectId(subject.getId());
+
+        // 允许 subject 为 null，只有在 subject 不为 null 时才设置 subjectId
+        if (subject != null) {
+            category.setSubjectId(subject.getId());
+            category.setSubject(subject);
+        }
         return category;
     }
 

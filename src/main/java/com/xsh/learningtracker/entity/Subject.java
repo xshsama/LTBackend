@@ -41,10 +41,6 @@ public class Subject {
     @OneToMany(mappedBy = "subject")
     private Set<Goal> goals = new HashSet<>();
 
-    @ManyToOne
-    @JoinColumn(name = "category_id")
-    private Category category;
-
     public Set<Tag> getTags() {
         return goals.stream()
                 .flatMap(goal -> goal.getTags().stream())

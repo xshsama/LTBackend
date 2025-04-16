@@ -16,11 +16,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.xsh.learningtracker.dto.ApiResponse;
+import com.xsh.learningtracker.dto.CategoryDTO;
 import com.xsh.learningtracker.dto.GoalDTO;
 import com.xsh.learningtracker.dto.SubjectDTO;
+import com.xsh.learningtracker.entity.Category;
 import com.xsh.learningtracker.entity.Goal;
 import com.xsh.learningtracker.entity.Subject;
-import com.xsh.learningtracker.entity.SubjectCategory;
 import com.xsh.learningtracker.entity.Task;
 import com.xsh.learningtracker.service.CategoryService;
 import com.xsh.learningtracker.service.SubjectService;
@@ -69,7 +70,7 @@ public class SubjectController {
         Integer userId = userService.findByUsername(username).getId();
         Subject subject = DTOConverter.toSubject(request, null); // 用户会在service层设置
         Subject createdSubject = subjectService.createSubject(subject, userId);
-        SubjectCategory category = subjectCategoryService.createSubjectCategory(subject.getId(),
+        subjectCategoryService.createSubjectCategory(subject.getId(),
                 request.getCategoryId());
         return ResponseEntity.ok(DTOConverter.toSubjectDTO(createdSubject));
     }
@@ -81,6 +82,14 @@ public class SubjectController {
         Subject subject = new Subject();
         subject.setTitle(request.getTitle());
         Subject updatedSubject = subjectService.updateSubject(id, subject);
+
+        // 如果提供了分类ID，更新学科与分类的关联
+        if (request.getCategoryId() != null) {
+            // 先删除旧的关联，再创建新的关联
+            subjectCategoryService.deleteBySubjectId(id);
+            subjectCategoryService.createSubjectCategory(id, request.getCategoryId());
+        }
+
         return ResponseEntity.ok(DTOConverter.toSubjectDTO(updatedSubject));
     }
 
@@ -126,9 +135,14 @@ public class SubjectController {
         return ResponseEntity.ok(goalDTOs);
     }
 
-    @GetMapping("/category/{categoryId}")
-    public ResponseEntity<SubjectDTO> getSubjectByCategory(@PathVariable Integer categoryId) {
-        Subject subject = subjectService.getSubjectByCategory(categoryId);
-        return ResponseEntity.ok(DTOConverter.toSubjectDTO(subject));
+    @GetMapping("/category/{subjectId}")
+    public ResponseEntity<CategoryDTO> getCategoryBySubject(@PathVariable Integer subjectId) {
+        Integer categoryId = subjectCategoryService.getCategoryIdBySubjectId(subjectId);
+        Category category = categoryService.getCategoryById(categoryId);
+        if (category == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(DTOConverter.toCategoryDTO(category));
     }
+
 }

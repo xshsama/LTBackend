@@ -48,10 +48,6 @@ public class DTOConverter {
                 .map(Tag::getName)
                 .collect(Collectors.toList()));
 
-        // 设置学科的分类
-        if (subject.getCategory() != null) {
-            dto.setCategory(toCategoryDTO(subject.getCategory()));
-        }
         return dto;
     }
 
@@ -146,7 +142,6 @@ public class DTOConverter {
         CategoryDTO dto = new CategoryDTO();
         dto.setId(category.getId());
         dto.setName(category.getName());
-        dto.setSubjectId(category.getSubjectId());
         return dto;
     }
 
@@ -178,12 +173,6 @@ public class DTOConverter {
     public static Category toCategory(CategoryDTO.CreateCategoryRequest request, Subject subject) {
         Category category = new Category();
         category.setName(request.getName());
-
-        // 允许 subject 为 null，只有在 subject 不为 null 时才设置 subjectId
-        if (subject != null) {
-            category.setSubjectId(subject.getId());
-            category.setSubject(subject);
-        }
         return category;
     }
 

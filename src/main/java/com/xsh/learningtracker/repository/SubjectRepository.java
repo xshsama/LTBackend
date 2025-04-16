@@ -16,6 +16,6 @@ public interface SubjectRepository extends JpaRepository<Subject, Integer> {
 
     List<Subject> findByUserIdOrderByCreatedAtDesc(Integer userId);
 
-    @Query("SELECT DISTINCT c.subject FROM Category c WHERE c.id = :categoryId")
+    @Query("SELECT s FROM Subject s JOIN SubjectCategory sc ON s.id = sc.subjectId WHERE sc.categoryId = :categoryId")
     Subject findByCategory(@Param("categoryId") Integer categoryId);
 }

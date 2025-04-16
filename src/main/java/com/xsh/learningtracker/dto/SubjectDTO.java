@@ -34,6 +34,7 @@ public class SubjectDTO {
     @Data
     public static class UpdateSubjectRequest {
         private String title;
+        private Integer categoryId;
     }
 
     @Data

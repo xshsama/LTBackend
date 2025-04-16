@@ -23,7 +23,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<Category> getCategoriesBySubjectId(Integer subjectId) {
-        return categoryRepository.findBySubjectId(subjectId);
+        return categoryRepository.findBySubjectIdViaSubjectCategory(subjectId);
     }
 
     @Override
@@ -35,11 +35,6 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public Category createCategory(Category category) {
         try {
-            // 确保即使没有关联的学科也能保存分类
-            // 如果前端传入的category.subject为null或category.subject.id为null，则设置subject为null
-            if (category.getSubject() != null && category.getSubject().getId() == null) {
-                category.setSubject(null);
-            }
             return categoryRepository.save(category);
         } catch (Exception e) {
             // 如果发生外键约束错误，尝试修复数据库结构
@@ -48,8 +43,6 @@ public class CategoryServiceImpl implements CategoryService {
                 Category newCategory = new Category();
                 newCategory.setName(category.getName());
                 newCategory.setDescription(category.getDescription());
-                newCategory.setSubject(null); // 确保不关联学科
-                newCategory.setSubjectId(null); // 确保ID也为null
 
                 return categoryRepository.save(newCategory);
             } catch (Exception ex) {
@@ -63,7 +56,6 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = getCategoryById(id);
         category.setName(categoryDetails.getName());
         category.setDescription(categoryDetails.getDescription());
-        category.setSubjectId(categoryDetails.getSubjectId());
         return categoryRepository.save(category);
     }
 

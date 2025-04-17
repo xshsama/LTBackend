@@ -12,7 +12,6 @@ import lombok.Data;
 public class GoalDTO {
     private Integer id;
     private String title;
-    private LocalDate deadline;
     private Goal.Status status;
     private Goal.Priority priority;
     private Integer progress;
@@ -35,7 +34,6 @@ public class GoalDTO {
     @Data
     public static class CreateGoalRequest {
         private String title;
-        private LocalDate deadline;
         private Goal.Priority priority = Goal.Priority.MEDIUM;
         private Integer expectedHours;
         private Integer categoryId;
@@ -46,7 +44,6 @@ public class GoalDTO {
     @Data
     public static class UpdateGoalRequest {
         private String title;
-        private LocalDate deadline;
         private Goal.Status status;
         private Goal.Priority priority;
         private Integer expectedHours;

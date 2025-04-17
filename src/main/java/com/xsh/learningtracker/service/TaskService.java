@@ -1,6 +1,5 @@
 package com.xsh.learningtracker.service;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import com.xsh.learningtracker.entity.Goal;
@@ -24,10 +23,6 @@ public interface TaskService {
     List<Task> getTasksByUserIdOrderByCreatedAtDesc(Integer userId);
 
     List<Task> getTasksByUserIdAndStatus(Integer userId, Task.Status status);
-
-    List<Task> getTasksByUserIdAndDueDateBetween(Integer userId, LocalDate startDate, LocalDate endDate);
-
-    List<Task> getOverdueTasks(Integer userId, LocalDate date);
 
     boolean existsById(Integer id);
 

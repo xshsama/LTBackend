@@ -37,7 +37,6 @@ public class GoalServiceImpl implements GoalService {
     public Goal updateGoal(Integer id, Goal goalDetails) {
         Goal goal = getGoalById(id);
         goal.setTitle(goalDetails.getTitle());
-        goal.setDeadline(goalDetails.getDeadline());
         goal.setStatus(goalDetails.getStatus());
         goal.setPriority(goalDetails.getPriority());
         goal.setProgress(goalDetails.getProgress());

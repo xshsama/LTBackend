@@ -13,7 +13,6 @@ public class TaskDTO {
     private Integer id;
     private String title;
     private String description;
-    private LocalDate dueDate;
     private Task.Status status;
     private Task.Priority priority;
     private Integer estimatedTimeMinutes;
@@ -29,7 +28,6 @@ public class TaskDTO {
     public static class CreateTaskRequest {
         private String title;
         private String description;
-        private LocalDate dueDate;
         private Task.Priority priority = Task.Priority.MEDIUM;
         private Integer estimatedTimeMinutes;
         private Integer goalId;
@@ -40,7 +38,6 @@ public class TaskDTO {
     public static class UpdateTaskRequest {
         private String title;
         private String description;
-        private LocalDate dueDate;
         private Task.Status status;
         private Task.Priority priority;
         private Integer estimatedTimeMinutes;

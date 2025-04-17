@@ -51,9 +51,7 @@ public class TaskController {
         Task task = new Task();
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
-        task.setDueDate(request.getDueDate());
         task.setPriority(request.getPriority());
-        task.setEstimatedTimeMinutes(request.getEstimatedTimeMinutes());
         task.setGoal(goalService.getGoalById(request.getGoalId()));
         Task createdTask = taskService.createTask(task, request.getGoalId());
         return ResponseEntity.ok(DTOConverter.toTaskDTO(createdTask));

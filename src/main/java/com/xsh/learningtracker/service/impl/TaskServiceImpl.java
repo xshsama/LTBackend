@@ -39,10 +39,8 @@ public class TaskServiceImpl implements TaskService {
         Task task = getTaskById(id);
         task.setTitle(taskDetails.getTitle());
         task.setDescription(taskDetails.getDescription());
-        task.setDueDate(taskDetails.getDueDate());
         task.setStatus(taskDetails.getStatus());
         task.setPriority(taskDetails.getPriority());
-        task.setEstimatedTimeMinutes(taskDetails.getEstimatedTimeMinutes());
         task.setActualTimeMinutes(taskDetails.getActualTimeMinutes());
         task.setCompletionDate(taskDetails.getCompletionDate());
         if (taskDetails.getTags() != null && !taskDetails.getTags().isEmpty()) {
@@ -89,17 +87,6 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<Task> getTasksByUserIdAndDueDateBetween(Integer userId, LocalDate startDate, LocalDate endDate) {
-        return taskRepository.findByGoalSubjectUserIdAndDueDateBetween(userId, startDate, endDate);
-    }
-
-    @Override
-    public List<Task> getOverdueTasks(Integer userId, LocalDate date) {
-        return taskRepository.findByGoalSubjectUserIdAndDueDateLessThanEqualAndStatusNot(
-                userId, date, Task.Status.COMPLETED);
-    }
-
-    @Override
     public boolean existsById(Integer id) {
         return taskRepository.existsById(id);
     }
@@ -113,12 +100,6 @@ public class TaskServiceImpl implements TaskService {
             task.setStatus(Task.Status.IN_PROGRESS);
         }
         // 如果实际时间达到或超过预估时间，任务状态改为已完成
-        if (task.getEstimatedTimeMinutes() != null &&
-                actualTimeMinutes >= task.getEstimatedTimeMinutes()) {
-            task.setStatus(Task.Status.COMPLETED);
-            task.setCompletionDate(LocalDate.now());
-        }
-        taskRepository.save(task);
     }
 
     @Override

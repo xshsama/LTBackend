@@ -9,10 +9,13 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
@@ -35,9 +38,6 @@ public class Goal {
 
     @Column(name = "title", nullable = false)
     private String title;
-
-    @Column(name = "deadline")
-    private LocalDate deadline;
 
     @Column(name = "status")
     private Status status;
@@ -71,10 +71,22 @@ public class Goal {
     @OneToMany(mappedBy = "goal")
     private Set<Task> tasks = new HashSet<>();
 
-    public Set<Tag> getTags() {
-        return tasks.stream()
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "goal_tags", joinColumns = @JoinColumn(name = "goal_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    private Set<Tag> tags = new HashSet<>();
+
+    /**
+     * 获取所有与此目标相关的标签，包括直接标签和通过任务间接关联的标签
+     */
+    public Set<Tag> getAllTags() {
+        Set<Tag> allTags = new HashSet<>(tags);
+
+        // 添加任务关联的标签
+        tasks.stream()
                 .flatMap(task -> task.getTags().stream())
-                .collect(java.util.stream.Collectors.toSet());
+                .forEach(allTags::add);
+
+        return allTags;
     }
 
     @PrePersist

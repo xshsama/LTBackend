@@ -57,7 +57,6 @@ public class GoalController {
     public ResponseEntity<GoalDTO> createGoal(@RequestBody GoalDTO.CreateGoalRequest request) {
         Goal goal = new Goal();
         goal.setTitle(request.getTitle());
-        goal.setDeadline(request.getDeadline());
         goal.setPriority(request.getPriority());
         goal.setExpectedHours(request.getExpectedHours());
         goal.setSubject(subjectService.getSubjectById(request.getSubjectId()));

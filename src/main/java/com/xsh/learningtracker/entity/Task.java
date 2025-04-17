@@ -35,9 +35,6 @@ public class Task {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "due_date")
-    private LocalDate dueDate;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private Status status = Status.NOT_STARTED;
@@ -48,9 +45,6 @@ public class Task {
     @Enumerated(EnumType.STRING)
     @Column(name = "priority", nullable = false)
     private Priority priority = Priority.MEDIUM;
-
-    @Column(name = "estimated_time_minutes")
-    private Integer estimatedTimeMinutes;
 
     @Column(name = "actual_time_minutes")
     private Integer actualTimeMinutes = 0;

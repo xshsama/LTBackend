@@ -58,7 +58,6 @@ public class DTOConverter {
         GoalDTO dto = new GoalDTO();
         dto.setId(goal.getId());
         dto.setTitle(goal.getTitle());
-        dto.setDeadline(goal.getDeadline());
         dto.setStatus(goal.getStatus());
         dto.setPriority(goal.getPriority());
         dto.setProgress(goal.getProgress());
@@ -96,7 +95,6 @@ public class DTOConverter {
         GoalDTO dto = new GoalDTO();
         // 只设置UpdateGoalRequest中存在的字段
         dto.setTitle(request.getTitle());
-        dto.setDeadline(request.getDeadline());
         dto.setStatus(request.getStatus());
         dto.setPriority(request.getPriority());
         dto.setExpectedHours(request.getExpectedHours());
@@ -117,10 +115,8 @@ public class DTOConverter {
         dto.setId(task.getId());
         dto.setTitle(task.getTitle());
         dto.setDescription(task.getDescription());
-        dto.setDueDate(task.getDueDate());
         dto.setStatus(task.getStatus());
         dto.setPriority(task.getPriority());
-        dto.setEstimatedTimeMinutes(task.getEstimatedTimeMinutes());
         dto.setActualTimeMinutes(task.getActualTimeMinutes());
         dto.setCompletionDate(task.getCompletionDate());
         dto.setCreatedAt(task.getCreatedAt());
@@ -150,9 +146,7 @@ public class DTOConverter {
         Task task = new Task();
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
-        task.setDueDate(request.getDueDate());
         task.setPriority(request.getPriority());
-        task.setEstimatedTimeMinutes(request.getEstimatedTimeMinutes());
         task.setGoal(goal);
         return task;
     }
@@ -160,7 +154,6 @@ public class DTOConverter {
     public static Goal toGoal(GoalDTO.CreateGoalRequest request, Subject subject, Category category) {
         Goal goal = new Goal();
         goal.setTitle(request.getTitle());
-        goal.setDeadline(request.getDeadline());
         goal.setPriority(request.getPriority());
         goal.setExpectedHours(request.getExpectedHours());
         goal.setSubject(subject);
@@ -186,7 +179,6 @@ public class DTOConverter {
     public static Goal toGoal(GoalDTO.UpdateGoalRequest request) {
         Goal goal = new Goal();
         goal.setTitle(request.getTitle());
-        goal.setDeadline(request.getDeadline());
         goal.setStatus(request.getStatus());
         goal.setPriority(request.getPriority());
         goal.setExpectedHours(request.getExpectedHours());
@@ -198,10 +190,8 @@ public class DTOConverter {
         Task task = new Task();
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
-        task.setDueDate(request.getDueDate());
         task.setStatus(request.getStatus());
         task.setPriority(request.getPriority());
-        task.setEstimatedTimeMinutes(request.getEstimatedTimeMinutes());
         return task;
     }
 }

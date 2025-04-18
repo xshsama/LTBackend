@@ -50,7 +50,6 @@ public class TaskController {
     public ResponseEntity<TaskDTO> createTask(@RequestBody TaskDTO.CreateTaskRequest request) {
         Task task = new Task();
         task.setTitle(request.getTitle());
-        task.setDescription(request.getDescription());
         task.setPriority(request.getPriority());
         task.setGoal(goalService.getGoalById(request.getGoalId()));
         Task createdTask = taskService.createTask(task, request.getGoalId());
@@ -77,11 +76,11 @@ public class TaskController {
         return ResponseEntity.ok(DTOConverter.toTaskDTO(updatedTask));
     }
 
-    @PutMapping("/{id}/time-spent")
-    public ResponseEntity<TaskDTO> updateActualTime(
+    @PutMapping("/{id}/study-hours")
+    public ResponseEntity<TaskDTO> updateStudyHours(
             @PathVariable Integer id,
-            @RequestBody TaskDTO.UpdateTimeRequest request) {
-        Task updatedTask = taskService.updateActualTime(id, request.getActualTimeMinutes());
+            @RequestBody TaskDTO.UpdateStudyHoursRequest request) {
+        Task updatedTask = taskService.updateStudyHours(id, request.getStudyHours());
         return ResponseEntity.ok(DTOConverter.toTaskDTO(updatedTask));
     }
 

@@ -58,7 +58,6 @@ public class GoalController {
         Goal goal = new Goal();
         goal.setTitle(request.getTitle());
         goal.setPriority(request.getPriority());
-        goal.setExpectedHours(request.getExpectedHours());
         goal.setSubject(subjectService.getSubjectById(request.getSubjectId()));
         Goal createdGoal = goalService.createGoal(goal, request.getSubjectId());
         return ResponseEntity.ok(DTOConverter.toGoalDTO(createdGoal));

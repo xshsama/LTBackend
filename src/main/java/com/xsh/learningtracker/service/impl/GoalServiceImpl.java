@@ -40,8 +40,6 @@ public class GoalServiceImpl implements GoalService {
         goal.setStatus(goalDetails.getStatus());
         goal.setPriority(goalDetails.getPriority());
         goal.setProgress(goalDetails.getProgress());
-        goal.setExpectedHours(goalDetails.getExpectedHours());
-        goal.setActualHours(goalDetails.getActualHours());
         goal.setCompletionDate(goalDetails.getCompletionDate());
         if (goalDetails.getCategory() != null) {
             goal.setCategory(goalDetails.getCategory());

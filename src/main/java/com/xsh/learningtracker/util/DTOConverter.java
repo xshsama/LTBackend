@@ -61,8 +61,6 @@ public class DTOConverter {
         dto.setStatus(goal.getStatus());
         dto.setPriority(goal.getPriority());
         dto.setProgress(goal.getProgress());
-        dto.setExpectedHours(goal.getExpectedHours());
-        dto.setActualHours(goal.getActualHours());
         dto.setCompletionDate(goal.getCompletionDate());
         dto.setCreatedAt(goal.getCreatedAt());
         dto.setUpdatedAt(goal.getUpdatedAt());
@@ -97,8 +95,6 @@ public class DTOConverter {
         dto.setTitle(request.getTitle());
         dto.setStatus(request.getStatus());
         dto.setPriority(request.getPriority());
-        dto.setExpectedHours(request.getExpectedHours());
-        dto.setActualHours(request.getActualHours());
         dto.setCategoryId(request.getCategoryId());
 
         // 直接设置标签，因为getTags()返回的是List<String>
@@ -114,19 +110,13 @@ public class DTOConverter {
         TaskDTO dto = new TaskDTO();
         dto.setId(task.getId());
         dto.setTitle(task.getTitle());
-        dto.setDescription(task.getDescription());
         dto.setStatus(task.getStatus());
         dto.setPriority(task.getPriority());
-        dto.setActualTimeMinutes(task.getActualTimeMinutes());
         dto.setCompletionDate(task.getCompletionDate());
         dto.setCreatedAt(task.getCreatedAt());
         dto.setUpdatedAt(task.getUpdatedAt());
         dto.setGoalId(task.getGoal().getId());
-
-        // 收集所有标签
-        dto.setTags(task.getTags().stream()
-                .map(Tag::getName)
-                .collect(Collectors.toList()));
+        dto.setWeight(task.getWeight());
 
         return dto;
     }
@@ -145,7 +135,6 @@ public class DTOConverter {
     public static Task toTask(TaskDTO.CreateTaskRequest request, Goal goal) {
         Task task = new Task();
         task.setTitle(request.getTitle());
-        task.setDescription(request.getDescription());
         task.setPriority(request.getPriority());
         task.setGoal(goal);
         return task;
@@ -155,7 +144,6 @@ public class DTOConverter {
         Goal goal = new Goal();
         goal.setTitle(request.getTitle());
         goal.setPriority(request.getPriority());
-        goal.setExpectedHours(request.getExpectedHours());
         goal.setSubject(subject);
         goal.setCategory(category);
         goal.setStatus(Goal.Status.NOT_STARTED);
@@ -181,15 +169,12 @@ public class DTOConverter {
         goal.setTitle(request.getTitle());
         goal.setStatus(request.getStatus());
         goal.setPriority(request.getPriority());
-        goal.setExpectedHours(request.getExpectedHours());
-        goal.setActualHours(request.getActualHours());
         return goal;
     }
 
     public static Task toTask(TaskDTO.UpdateTaskRequest request) {
         Task task = new Task();
         task.setTitle(request.getTitle());
-        task.setDescription(request.getDescription());
         task.setStatus(request.getStatus());
         task.setPriority(request.getPriority());
         return task;

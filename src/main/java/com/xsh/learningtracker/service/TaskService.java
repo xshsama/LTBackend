@@ -26,9 +26,9 @@ public interface TaskService {
 
     boolean existsById(Integer id);
 
-    void updateProgress(Integer id, Integer actualTimeMinutes);
+    void updateProgress(Integer id, Integer studyHours);
 
     Task updateTaskStatus(Integer id, Task.Status status);
 
-    Task updateActualTime(Integer id, Integer actualTimeMinutes);
+    Task updateStudyHours(Integer id, Integer studyHours);
 }

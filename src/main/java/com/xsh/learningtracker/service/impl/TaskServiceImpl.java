@@ -38,10 +38,8 @@ public class TaskServiceImpl implements TaskService {
     public Task updateTask(Integer id, Task taskDetails) {
         Task task = getTaskById(id);
         task.setTitle(taskDetails.getTitle());
-        task.setDescription(taskDetails.getDescription());
         task.setStatus(taskDetails.getStatus());
         task.setPriority(taskDetails.getPriority());
-        task.setActualTimeMinutes(taskDetails.getActualTimeMinutes());
         task.setCompletionDate(taskDetails.getCompletionDate());
         if (taskDetails.getTags() != null && !taskDetails.getTags().isEmpty()) {
             task.setTags(taskDetails.getTags());
@@ -93,13 +91,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void updateProgress(Integer id, Integer actualTimeMinutes) {
-        Task task = getTaskById(id);
-        task.setActualTimeMinutes(actualTimeMinutes);
-        // 如果实际时间大于0，任务状态改为进行中
-        if (actualTimeMinutes > 0 && task.getStatus() == Task.Status.NOT_STARTED) {
-            task.setStatus(Task.Status.IN_PROGRESS);
-        }
-        // 如果实际时间达到或超过预估时间，任务状态改为已完成
+
     }
 
     @Override
@@ -118,15 +110,9 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task updateActualTime(Integer id, Integer actualTimeMinutes) {
+    public Task updateStudyHours(Integer id, Integer studyHours) {
         Task task = getTaskById(id);
-        task.setActualTimeMinutes(actualTimeMinutes);
-
-        // 如果实际时间大于0，任务状态改为进行中
-        if (actualTimeMinutes > 0 && task.getStatus() == Task.Status.NOT_STARTED) {
-            task.setStatus(Task.Status.IN_PROGRESS);
-        }
-
+        task.setStudyHours(studyHours);
         return taskRepository.save(task);
     }
 }

@@ -12,52 +12,47 @@ import lombok.Data;
 public class TaskDTO {
     private Integer id;
     private String title;
-    private String description;
     private Task.Status status;
     private Task.Priority priority;
-    private Integer estimatedTimeMinutes;
-    private Integer actualTimeMinutes;
+    private Integer studyHours; // 替换为学时字段
     private LocalDate completionDate;
+    private Integer weight; // 添加权重字段，范围1-10
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Integer goalId;
-    private List<String> tags;
+    private List<TagDTO> tags; // 修改为TagDTO列表
 
     // 用于创建和更新的内部类
     @Data
     public static class CreateTaskRequest {
         private String title;
-        private String description;
         private Task.Priority priority = Task.Priority.MEDIUM;
-        private Integer estimatedTimeMinutes;
+        private Integer studyHours = 0; // 替换为学时字段
+        private Integer weight = 5; // 默认权重为5
         private Integer goalId;
-        private List<String> tags;
+        private List<Integer> tagIds; // 使用标签ID列表
     }
 
     @Data
     public static class UpdateTaskRequest {
         private String title;
-        private String description;
         private Task.Status status;
         private Task.Priority priority;
-        private Integer estimatedTimeMinutes;
-        private List<String> tags;
+        private Integer studyHours; // 替换为学时字段
+        private Integer weight;
+        private LocalDate completionDate; // 添加完成日期
+        private List<Integer> tagIds; // 使用标签ID列表
     }
 
     @Data
     public static class TaskProgress {
         private Double completionPercentage;
-        private Integer totalTimeSpent;
-        private Integer remainingTime;
+        private Integer studyHours;
         private Boolean isOverdue;
         private Integer daysUntilDue;
 
-        public void calculateProgress(Integer estimatedTime, Integer actualTime, LocalDate dueDate) {
-            this.totalTimeSpent = actualTime;
-            this.remainingTime = estimatedTime != null ? estimatedTime - actualTime : null;
-            this.completionPercentage = estimatedTime != null && estimatedTime > 0
-                    ? (actualTime * 100.0) / estimatedTime
-                    : null;
+        public void calculateProgress(Integer studyHours, LocalDate dueDate) {
+            this.studyHours = studyHours;
 
             LocalDate today = LocalDate.now();
             this.isOverdue = dueDate != null && today.isAfter(dueDate);
@@ -73,7 +68,7 @@ public class TaskDTO {
     }
 
     @Data
-    public static class UpdateTimeRequest {
-        private Integer actualTimeMinutes;
+    public static class UpdateStudyHoursRequest {
+        private Integer studyHours;
     }
 }

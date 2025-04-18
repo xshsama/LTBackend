@@ -32,9 +32,6 @@ public class Task {
     @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "description")
-    private String description;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private Status status = Status.NOT_STARTED;
@@ -46,8 +43,11 @@ public class Task {
     @Column(name = "priority", nullable = false)
     private Priority priority = Priority.MEDIUM;
 
-    @Column(name = "actual_time_minutes")
-    private Integer actualTimeMinutes = 0;
+    @Column(name = "study_hours", nullable = false)
+    private Integer studyHours = 0; // 学习学时
+
+    @Column(name = "weight", nullable = false)
+    private Integer weight = 5; // 添加权重字段，默认为5，范围1-10
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

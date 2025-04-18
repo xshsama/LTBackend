@@ -52,12 +52,6 @@ public class Goal {
     @Column(name = "progress")
     private Integer progress = 0;
 
-    @Column(name = "expected_hours")
-    private Integer expectedHours;
-
-    @Column(name = "actual_hours")
-    private Integer actualHours = 0;
-
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -105,6 +99,6 @@ public class Goal {
     }
 
     public enum Status {
-        ONGOING, COMPLETED, EXPIRED, NOT_STARTED
+        NOT_STARTED, ONGOING, COMPLETED, EXPIRED
     }
 }

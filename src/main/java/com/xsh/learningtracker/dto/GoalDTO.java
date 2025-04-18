@@ -15,8 +15,6 @@ public class GoalDTO {
     private Goal.Status status;
     private Goal.Priority priority;
     private Integer progress;
-    private Integer expectedHours;
-    private Integer actualHours;
     private LocalDate completionDate;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -35,7 +33,6 @@ public class GoalDTO {
     public static class CreateGoalRequest {
         private String title;
         private Goal.Priority priority = Goal.Priority.MEDIUM;
-        private Integer expectedHours;
         private Integer categoryId;
         private Integer subjectId;
         private List<String> tags;
@@ -46,8 +43,6 @@ public class GoalDTO {
         private String title;
         private Goal.Status status;
         private Goal.Priority priority;
-        private Integer expectedHours;
-        private Integer actualHours;
         private Integer categoryId;
         private List<String> tags;
     }

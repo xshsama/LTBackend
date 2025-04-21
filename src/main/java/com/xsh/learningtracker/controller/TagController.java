@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.xsh.learningtracker.dto.TagDTO;
 import com.xsh.learningtracker.entity.Tag;
 import com.xsh.learningtracker.service.TagService;
 import com.xsh.learningtracker.service.UserService;
@@ -31,24 +32,30 @@ public class TagController {
     private final TagService tagService;
 
     @GetMapping
-    public ResponseEntity<List<Tag>> getAllTags(Authentication authentication) {
+    public ResponseEntity<List<TagDTO>> getAllTags(Authentication authentication) {
         // 获取当前登录用户的ID
         String username = authentication.getName();
         Integer userId = userService.findByUsername(username).getId();
-        return ResponseEntity.ok(tagService.getTagsByUserId(userId));
+        List<Tag> tags = tagService.getTagsByUserId(userId);
+        List<TagDTO> tagDTOs = tags.stream()
+                .map(tag -> new TagDTO(tag.getId(), tag.getName(), tag.getColor()))
+                .toList();
+        return ResponseEntity.ok(tagDTOs);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Tag> getTagById(@PathVariable Integer id) {
-        return ResponseEntity.ok(tagService.getTagById(id));
+    public ResponseEntity<TagDTO> getTagById(@PathVariable Integer id) {
+        Tag tag = tagService.getTagById(id);
+        return ResponseEntity.ok(new TagDTO(tag.getId(), tag.getName(), tag.getColor()));
     }
 
     @PostMapping
-    public ResponseEntity<Tag> createTag(@RequestBody Tag tag, Authentication authentication) {
+    public ResponseEntity<TagDTO> createTag(@RequestBody Tag tag, Authentication authentication) {
         // 设置当前登录用户
         String username = authentication.getName();
         tag.setUser(userService.findByUsername(username));
-        return ResponseEntity.ok(tagService.createTag(tag));
+        Tag createdTag = tagService.createTag(tag);
+        return ResponseEntity.ok(new TagDTO(createdTag.getId(), createdTag.getName(), createdTag.getColor()));
     }
 
     @PutMapping("/{id}")

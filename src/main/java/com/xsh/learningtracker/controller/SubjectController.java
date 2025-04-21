@@ -3,7 +3,10 @@ package com.xsh.learningtracker.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,9 +32,12 @@ import com.xsh.learningtracker.service.UserService;
 import com.xsh.learningtracker.service.subjectCategoryService;
 import com.xsh.learningtracker.util.DTOConverter;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @RestController
 @RequestMapping("/api/subjects")
 public class SubjectController {
+    private static final Logger logger = LoggerFactory.getLogger(SubjectController.class);
 
     @Autowired
     private subjectCategoryService subjectCategoryService;
@@ -46,7 +52,31 @@ public class SubjectController {
     private UserService userService;
 
     @GetMapping
-    public ResponseEntity<List<SubjectDTO>> getAllSubjects(Authentication authentication) {
+    public ResponseEntity<List<SubjectDTO>> getAllSubjects(HttpServletRequest request) {
+        logger.info("GET /api/subjects request received");
+        logger.info("Authorization header: {}", request.getHeader("Authorization"));
+        logger.info("Request URL: {}", request.getRequestURL());
+        logger.info("Remote Host: {}", request.getRemoteHost());
+
+        try {
+            List<Subject> subjects = subjectService.getAllSubjects();
+            logger.info("Retrieved {} subjects from service", subjects.size());
+
+            List<SubjectDTO> subjectDTOs = subjects.stream()
+                    .map(DTOConverter::toSubjectDTO)
+                    .collect(Collectors.toList());
+
+            logger.info("Returning {} subject DTOs", subjectDTOs.size());
+            return ResponseEntity.ok(subjectDTOs);
+        } catch (Exception e) {
+            logger.error("Error in getAllSubjects: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // 保持其他方法不变...
+    @GetMapping("/my")
+    public ResponseEntity<List<SubjectDTO>> getMySubjects(Authentication authentication) {
         String username = authentication.getName();
         Integer userId = userService.findByUsername(username).getId();
         List<Subject> subjects = subjectService.getSubjectsByUserId(userId);
@@ -54,12 +84,6 @@ public class SubjectController {
                 .map(DTOConverter::toSubjectDTO)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(subjectDTOs);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<SubjectDTO> getSubject(@PathVariable Integer id) {
-        Subject subject = subjectService.getSubjectById(id);
-        return ResponseEntity.ok(DTOConverter.toSubjectDTO(subject));
     }
 
     @PostMapping

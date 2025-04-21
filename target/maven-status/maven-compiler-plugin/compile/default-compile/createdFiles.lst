@@ -34,7 +34,6 @@ com/xsh/learningtracker/dto/TaskDTO$TaskProgress.class
 com/xsh/learningtracker/controller/GoalController.class
 com/xsh/learningtracker/dto/TaskDTO$UpdateStatusRequest.class
 com/xsh/learningtracker/service/ImageUploadService.class
-com/xsh/learningtracker/dto/TaskDTO$UpdateTimeRequest.class
 com/xsh/learningtracker/entity/Tag.class
 com/xsh/learningtracker/dto/GoalDTO$GoalStats.class
 com/xsh/learningtracker/service/impl/GoalServiceImpl.class

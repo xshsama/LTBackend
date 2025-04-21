@@ -21,4 +21,6 @@ public interface SubjectService {
     boolean existsById(Integer id);
 
     Subject getSubjectByCategory(Integer categoryId);
+
+    List<Subject> getAllSubjects();
 }

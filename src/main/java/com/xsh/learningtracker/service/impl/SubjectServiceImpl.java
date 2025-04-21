@@ -69,4 +69,9 @@ public class SubjectServiceImpl implements SubjectService {
     public Subject getSubjectByCategory(Integer categoryId) {
         return subjectRepository.findByCategory(categoryId);
     }
+
+    @Override
+    public List<Subject> getAllSubjects() {
+        return subjectRepository.findAll();
+    }
 }

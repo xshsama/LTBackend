@@ -10,10 +10,14 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Data
 @Entity
 @Table(name = "user_preferences")
+@EqualsAndHashCode(exclude = "user")
+@ToString(exclude = "user")
 public class UserPreference {
 
     @Id

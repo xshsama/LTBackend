@@ -9,10 +9,14 @@ import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Data
 @Entity
 @Table(name = "user_info")
+@EqualsAndHashCode(exclude = "user")
+@ToString(exclude = "user")
 public class UserInfo {
     @Id
     private Integer id;

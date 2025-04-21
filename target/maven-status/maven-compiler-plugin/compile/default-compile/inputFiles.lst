@@ -1,5 +1,6 @@
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/service/TagService.java
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/service/TaskService.java
+/Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/entity/SubjectCategory.java
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/dto/ApiResponse.java
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/repository/SubjectRepository.java
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/dto/UpdatePasswordRequest.java
@@ -7,6 +8,7 @@
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/dto/CategoryDTO.java
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/service/impl/TagServiceImpl.java
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/config/SecurityConfig.java
+/Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/repository/SubjectCategoryRepository.java
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/entity/Task.java
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/exception/GlobalExceptionHandler.java
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/config/PasswordEncoderConfig.java
@@ -17,11 +19,13 @@
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/service/UserPreferenceService.java
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/controller/AuthController.java
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/repository/UserInfoRepository.java
+/Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/dto/TagDTO.java
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/controller/SubjectController.java
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/dto/RefreshTokenResponse.java
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/controller/GoalController.java
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/service/ImageUploadService.java
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/service/UserService.java
+/Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/service/impl/subjectCategoryServiceImpl.java
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/util/JwtUtil.java
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/LearningtrackerApplication.java
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/service/impl/SubjectServiceImpl.java
@@ -46,10 +50,12 @@
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/controller/AvatarUploadController.java
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/dto/TokenRefreshRequest.java
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/controller/UserPreferenceController.java
+/Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/dto/Subject_CategoryDTO.java
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/controller/TaskController.java
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/dto/TaskDTO.java
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/entity/Goal.java
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/repository/TagRepository.java
+/Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/service/subjectCategoryService.java
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/repository/TaskRepository.java
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/config/JwtAuthFilter.java
 /Users/xshsama/code/LearningTracker/backend/src/main/java/com/xsh/learningtracker/config/CustomUserDetailsService.java

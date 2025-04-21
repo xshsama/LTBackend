@@ -18,4 +18,6 @@ public interface SubjectRepository extends JpaRepository<Subject, Integer> {
 
     @Query("SELECT s FROM Subject s JOIN SubjectCategory sc ON s.id = sc.subjectId WHERE sc.categoryId = :categoryId")
     Subject findByCategory(@Param("categoryId") Integer categoryId);
+
+    List<Subject> findAll();
 }

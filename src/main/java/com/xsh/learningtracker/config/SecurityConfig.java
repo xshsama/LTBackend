@@ -78,6 +78,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/avatar/upload/**").authenticated() // 上传图片需要认证
                         .requestMatchers(HttpMethod.POST, "/api/user/password").authenticated() // 修改密码需要认证
                         .requestMatchers("/api/user/preferences/**").authenticated() // 用户偏好设置相关的所有请求都需要认证
+                        .requestMatchers(HttpMethod.GET, "/api/subjects").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/subjects/**").permitAll() // 允许获取学习主题
                         .requestMatchers(HttpMethod.POST, "/api/subjects/**").authenticated() // 修改学习主题需要认证
                         .requestMatchers(HttpMethod.GET, "/api/tags/**").permitAll() // 允许获取标签

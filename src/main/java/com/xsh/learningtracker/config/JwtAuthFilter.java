@@ -48,11 +48,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         final String requestPath = request.getServletPath();
         logger.debug("当前请求路径: {}", requestPath);
 
-        // 使用精确的路径匹配，而不是contains
+        // 检查路径是否需要跳过JWT验证
         if (requestPath.equals("/api/auth/login") ||
                 requestPath.equals("/api/auth/register") ||
                 requestPath.equals("/api/auth/refresh-token") ||
-                requestPath.startsWith("/api/auth/")) {
+                requestPath.startsWith("/api/auth/") ||
+                (requestPath.startsWith("/api/subjects") || requestPath.equals("/api/subjects"))
+                        && request.getMethod().equals("GET")
+                ||
+                requestPath.startsWith("/api/tags/") && request.getMethod().equals("GET") ||
+                requestPath.startsWith("/api/categories/") && request.getMethod().equals("GET")) {
             logger.debug("跳过JWT验证，路径: {}", requestPath);
             filterChain.doFilter(request, response);
             return;

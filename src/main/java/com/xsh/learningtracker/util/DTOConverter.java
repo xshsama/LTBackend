@@ -6,6 +6,7 @@ import com.xsh.learningtracker.dto.CategoryDTO;
 import com.xsh.learningtracker.dto.GoalDTO;
 import com.xsh.learningtracker.dto.GoalDTO.UpdateGoalRequest;
 import com.xsh.learningtracker.dto.SubjectDTO;
+import com.xsh.learningtracker.dto.TagDTO;
 import com.xsh.learningtracker.dto.TaskDTO;
 import com.xsh.learningtracker.entity.Category;
 import com.xsh.learningtracker.entity.Goal;
@@ -117,6 +118,18 @@ public class DTOConverter {
         dto.setUpdatedAt(task.getUpdatedAt());
         dto.setGoalId(task.getGoal().getId());
         dto.setWeight(task.getWeight());
+        dto.setStudyHours(task.getStudyHours());
+
+        // 收集任务的所有标签
+        dto.setTags(task.getTags().stream()
+                .map(tag -> {
+                    TagDTO tagDto = new TagDTO();
+                    tagDto.setId(tag.getId());
+                    tagDto.setName(tag.getName());
+                    tagDto.setColor(tag.getColor());
+                    return tagDto;
+                })
+                .collect(Collectors.toList()));
 
         return dto;
     }

@@ -2,6 +2,7 @@ package com.xsh.learningtracker.controller;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.xsh.learningtracker.dto.ApiResponse;
+import com.xsh.learningtracker.dto.TagDTO;
 import com.xsh.learningtracker.dto.TaskTagRequestDTO;
 import com.xsh.learningtracker.entity.Tag;
 import com.xsh.learningtracker.entity.Task;
@@ -60,11 +62,21 @@ public class TaskTagController {
      * 获取任务的所有标签
      */
     @GetMapping("/task/{taskId}/tags")
-    public ResponseEntity<ApiResponse<Set<Tag>>> getTagsByTaskId(@PathVariable Integer taskId) {
+    public ResponseEntity<ApiResponse<List<TagDTO>>> getTagsByTaskId(@PathVariable Integer taskId) {
         System.out.println("接收到获取任务标签请求，任务ID: " + taskId);
         Set<Tag> tags = taskTagService.getTagsByTaskId(taskId);
-        System.out.println("返回标签数据: " + tags);
-        return ResponseEntity.ok(ApiResponse.success("获取任务标签成功", tags));
+
+        // 将Tag实体转换为TagDTO
+        List<TagDTO> tagDTOs = tags.stream()
+                .map(tag -> new TagDTO(
+                        tag.getId(),
+                        tag.getName(),
+                        tag.getColor(),
+                        tag.getUser() != null ? tag.getUser().getId() : null))
+                .collect(Collectors.toList());
+
+        System.out.println("返回标签数据: " + tagDTOs);
+        return ResponseEntity.ok(ApiResponse.success("获取任务标签成功", tagDTOs));
     }
 
     /**

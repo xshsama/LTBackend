@@ -66,16 +66,36 @@ public class TaskTagServiceImpl implements TaskTagService {
 
     @Override
     public void removeTagFromTask(Integer taskId, Integer tagId) {
-        // 使用repository直接删除关联关系，无需加载实体
+        // 从TaskTag表中删除关联关系
         taskTagRepository.deleteByTask_IdAndTag_Id(taskId, tagId);
+
+        // 同时更新Task实体中的标签集合
+        Task task = taskRepository.findById(taskId).orElse(null);
+        if (task != null) {
+            task.getTags().removeIf(tag -> tag.getId().equals(tagId));
+            taskRepository.save(task);
+        }
     }
 
     @Override
     public Set<Tag> getTagsByTaskId(Integer taskId) {
-        List<TaskTag> taskTags = taskTagRepository.findByTask_Id(taskId);
-        return taskTags.stream()
-                .map(TaskTag::getTag)
-                .collect(Collectors.toSet());
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("任务不存在，ID: " + taskId));
+
+        // 显式加载标签数据并强制初始化
+        Set<Tag> tags = task.getTags();
+        // 打印调试信息，查看是否确实获取到了标签
+        System.out.println("从Task对象中获取到的标签数量: " + (tags != null ? tags.size() : 0));
+        if (tags.isEmpty()) {
+            // 如果Task中没有标签数据，尝试从TaskTag表中查询
+            List<TaskTag> taskTags = taskTagRepository.findByTask_Id(taskId);
+            System.out.println("从TaskTag表中查询到的关系数量: " + taskTags.size());
+            return taskTags.stream()
+                    .map(TaskTag::getTag)
+                    .collect(Collectors.toSet());
+        }
+
+        return tags;
     }
 
     @Override

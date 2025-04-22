@@ -85,6 +85,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/tags/**").authenticated() // 修改标签需要认证
                         .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll() // 允许获取分类
                         .requestMatchers(HttpMethod.POST, "/api/categories/**").authenticated() // 修改分类需要认证
+                        .requestMatchers("/api/tasks/**").authenticated() // 所有任务相关API都需要认证（任何HTTP方法）
                         .anyRequest().authenticated())
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)

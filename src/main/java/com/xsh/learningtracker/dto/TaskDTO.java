@@ -2,6 +2,7 @@ package com.xsh.learningtracker.dto;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.xsh.learningtracker.entity.Task;
@@ -20,7 +21,7 @@ public class TaskDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Integer goalId;
-    private List<TagDTO> tags; // 修改为TagDTO列表
+    private List<TagDTO> tags = new ArrayList<>(); // 初始化为空列表
 
     // 用于创建和更新的内部类
     @Data

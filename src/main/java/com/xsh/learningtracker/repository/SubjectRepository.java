@@ -19,5 +19,9 @@ public interface SubjectRepository extends JpaRepository<Subject, Integer> {
     @Query("SELECT s FROM Subject s JOIN SubjectCategory sc ON s.id = sc.subjectId WHERE sc.categoryId = :categoryId")
     Subject findByCategory(@Param("categoryId") Integer categoryId);
 
+    // 添加一个带有预加载goals和tasks的查询
+    @Query("SELECT DISTINCT s FROM Subject s LEFT JOIN FETCH s.goals g LEFT JOIN FETCH g.tasks")
+    List<Subject> findAllWithGoalsAndTasks();
+
     List<Subject> findAll();
 }

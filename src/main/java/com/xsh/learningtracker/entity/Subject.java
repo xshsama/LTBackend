@@ -16,6 +16,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
 @Entity
@@ -39,6 +40,7 @@ public class Subject {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "subject")
+    @EqualsAndHashCode.Exclude
     private Set<Goal> goals = new HashSet<>();
 
     public Set<Tag> getTags() {

@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.xsh.learningtracker.entity.Goal;
+import com.xsh.learningtracker.entity.Tag;
 
 import lombok.Data;
 
@@ -26,7 +27,7 @@ public class GoalDTO {
     private Integer completedTasks;
     private Integer remainingTasks;
     private Double completionRate;
-    private List<String> tags;
+    private List<Tag> tags;
 
     // 用于创建和更新的内部类
     @Data
@@ -35,7 +36,7 @@ public class GoalDTO {
         private Goal.Priority priority = Goal.Priority.MEDIUM;
         private Integer categoryId;
         private Integer subjectId;
-        private List<String> tags;
+        private List<Tag> tags;
     }
 
     @Data
@@ -44,7 +45,7 @@ public class GoalDTO {
         private Goal.Status status;
         private Goal.Priority priority;
         private Integer categoryId;
-        private List<String> tags;
+        private List<Tag> tags;
     }
 
     @Data

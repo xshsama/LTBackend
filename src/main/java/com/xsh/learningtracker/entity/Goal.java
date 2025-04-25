@@ -63,7 +63,7 @@ public class Goal {
     private Category category;
 
     @OneToMany(mappedBy = "goal")
-    private Set<Task> tasks = new HashSet<>();
+    private Set<BaseTask> tasks = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "goal_tags", joinColumns = @JoinColumn(name = "goal_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))

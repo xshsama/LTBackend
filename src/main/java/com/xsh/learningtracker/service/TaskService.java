@@ -2,33 +2,67 @@ package com.xsh.learningtracker.service;
 
 import java.util.List;
 
+import com.xsh.learningtracker.entity.BaseTask;
+import com.xsh.learningtracker.entity.CreativeTask;
 import com.xsh.learningtracker.entity.Goal;
-import com.xsh.learningtracker.entity.Task;
+import com.xsh.learningtracker.entity.HabitTask;
+import com.xsh.learningtracker.entity.StepTask;
 
 public interface TaskService {
-    Task createTask(Task task, Integer goalId);
+    // 通用方法 - 适用于所有任务类型
+    BaseTask createBaseTask(BaseTask task, Integer goalId);
 
-    Task updateTask(Integer id, Task task);
+    BaseTask updateBaseTask(Integer id, BaseTask task);
 
     void deleteTask(Integer id);
 
-    Task getTaskById(Integer id);
+    BaseTask getTaskById(Integer id);
 
-    List<Task> getTasksByGoal(Goal goal);
+    List<BaseTask> getTasksByGoal(Goal goal);
 
-    List<Task> getTasksByGoalId(Integer goalId);
+    List<BaseTask> getTasksByGoalId(Integer goalId);
 
-    List<Task> getTasksByGoalIdAndStatus(Integer goalId, Task.Status status);
+    List<BaseTask> getTasksByGoalIdAndStatus(Integer goalId, BaseTask.Status status);
 
-    List<Task> getTasksByUserIdOrderByCreatedAtDesc(Integer userId);
+    List<BaseTask> getTasksByUserIdOrderByCreatedAtDesc(Integer userId);
 
-    List<Task> getTasksByUserIdAndStatus(Integer userId, Task.Status status);
+    List<BaseTask> getTasksByUserIdAndStatus(Integer userId, BaseTask.Status status);
 
     boolean existsById(Integer id);
 
-    void updateProgress(Integer id, Integer studyHours);
+    BaseTask updateTaskStatus(Integer id, BaseTask.Status status);
 
-    Task updateTaskStatus(Integer id, Task.Status status);
+    // 步骤型任务特有方法
+    StepTask createStepTask(StepTask task, Integer goalId);
 
-    Task updateStudyHours(Integer id, Integer studyHours);
+    StepTask updateStepTask(Integer id, StepTask task);
+
+    StepTask updateStepTaskProgress(Integer id, Integer completedSteps, Integer blockedSteps);
+
+    StepTask updateStepStatus(Integer id, String stepId, StepTask.StepStatus status);
+
+    // 习惯型任务特有方法
+    HabitTask createHabitTask(HabitTask task, Integer goalId);
+
+    HabitTask updateHabitTask(Integer id, HabitTask task);
+
+    HabitTask addCheckin(Integer id, String date, HabitTask.CheckinStatus status, String notes);
+
+    HabitTask updateStreakInfo(Integer id);
+
+    // 创意型任务特有方法
+    CreativeTask createCreativeTask(CreativeTask task, Integer goalId);
+
+    CreativeTask updateCreativeTask(Integer id, CreativeTask task);
+
+    CreativeTask updateCreativePhase(Integer id, CreativeTask.CreativePhase phase);
+
+    CreativeTask addVersion(Integer id, CreativeTask.Version version);
+
+    CreativeTask addFeedback(Integer id, CreativeTask.Feedback feedback);
+
+    // 按类型获取任务列表
+    List<BaseTask> getTasksByType(BaseTask.TaskType type);
+
+    List<BaseTask> getTasksByGoalIdAndType(Integer goalId, BaseTask.TaskType type);
 }

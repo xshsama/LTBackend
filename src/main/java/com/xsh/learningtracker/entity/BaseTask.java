@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.DiscriminatorType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -13,6 +15,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
@@ -22,43 +26,41 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.Data;
 
+/**
+ * 任务基础类，用于继承扩展不同类型的任务
+ */
 @Data
 @Entity
 @Table(name = "tasks")
-public class Task {
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "task_type", discriminatorType = DiscriminatorType.STRING)
+public class BaseTask {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "title", nullable = false)
+    @Column(name = "title", nullable = false, length = 64)
     private String title;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
+    private TaskType type;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private Status status = Status.NOT_STARTED;
+    private Status status = Status.ACTIVE;
 
     @Column(name = "completion_date")
     private LocalDate completionDate;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "priority", nullable = false)
-    private Priority priority = Priority.MEDIUM;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "type", nullable = false)
-    private TaskType type = TaskType.STEP; // 任务类型：步骤类、习惯性、创作型
-
-    @Column(name = "study_hours", nullable = false)
-    private Integer studyHours = 0; // 学习学时
-
-    @Column(name = "weight", nullable = false)
-    private Integer weight = 5; // 添加权重字段，默认为5，范围1-10
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "metadata")
+    private String metadata; // JSON格式存储的扩展字段，包括难度和能量消耗等
 
     @ManyToOne
     @JoinColumn(name = "goal_id", nullable = false)
@@ -79,17 +81,13 @@ public class Task {
         updatedAt = LocalDateTime.now();
     }
 
+    // 通用的任务状态枚举
     public enum Status {
-        NOT_STARTED, IN_PROGRESS, COMPLETED, OVERDUE, CANCELLED
+        ACTIVE, PAUSED, ARCHIVED
     }
 
-    public enum Priority {
-        LOW, MEDIUM, HIGH, URGENT
-    }
-
+    // 任务类型枚举
     public enum TaskType {
-        STEP, // 步骤类
-        HABIT, // 习惯性
-        CREATIVE // 创作型
+        STEP, HABIT, CREATIVE
     }
 }

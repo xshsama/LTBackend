@@ -5,18 +5,22 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import com.xsh.learningtracker.entity.BaseTask;
 import com.xsh.learningtracker.entity.Goal;
-import com.xsh.learningtracker.entity.Task;
 
 @Repository
-public interface TaskRepository extends JpaRepository<Task, Integer> {
-        List<Task> findByGoal(Goal goal);
+public interface TaskRepository extends JpaRepository<BaseTask, Integer> {
+        List<BaseTask> findByGoal(Goal goal);
 
-        List<Task> findByGoalId(Integer goalId);
+        List<BaseTask> findByGoalId(Integer goalId);
 
-        List<Task> findByGoalIdAndStatus(Integer goalId, Task.Status status);
+        List<BaseTask> findByGoalIdAndStatus(Integer goalId, BaseTask.Status status);
 
-        List<Task> findByGoalSubjectUserIdOrderByCreatedAtDesc(Integer userId);
+        List<BaseTask> findByGoalSubjectUserIdOrderByCreatedAtDesc(Integer userId);
 
-        List<Task> findByGoalSubjectUserIdAndStatus(Integer userId, Task.Status status);
+        List<BaseTask> findByGoalSubjectUserIdAndStatus(Integer userId, BaseTask.Status status);
+
+        List<BaseTask> findByType(BaseTask.TaskType type);
+
+        List<BaseTask> findByGoalIdAndType(Integer goalId, BaseTask.TaskType type);
 }

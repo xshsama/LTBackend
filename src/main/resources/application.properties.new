@@ -1,0 +1,46 @@
+# 数据库连接配置
+spring.datasource.url=jdbc:mysql://localhost:1100/learning_tracker?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&characterEncoding=utf-8
+spring.datasource.username=root
+spring.datasource.password=ying200568
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+# JPA/Hibernate 配置
+spring.jpa.show-sql=true
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.properties.hibernate.use_sql_comments=true
+
+# Flyway 配置
+spring.flyway.enabled=false
+# spring.flyway.locations=classpath:db/migration
+# spring.flyway.baseline-on-migrate=true
+# spring.flyway.validate-on-migrate=false
+# spring.flyway.out-of-order=true
+
+# 时区设置
+spring.jackson.time-zone=Asia/Shanghai
+spring.jackson.date-format=yyyy-MM-dd HH:mm:ss
+
+# 服务器配置
+server.port=8080
+# 日志配置
+logging.file.name=./logs/app.log
+logging.logback.rollingpolicy.file-name-pattern=./logs/app-%d{yyyy-MM-dd}.%i.log
+logging.logback.rollingpolicy.max-file-size=10MB
+logging.logback.rollingpolicy.max-history=30
+logging.logback.rollingpolicy.total-size-cap=500MB
+logging.logback.rollingpolicy.clean-history-on-start=true
+# 日志级别
+logging.level.org.hibernate.SQL=DEBUG
+logging.level.org.hibernate.type.descriptor.sql.BasicBinder=TRACE
+logging.level.com.xsh.learningtracker=DEBUG
+logging.level.com.xsh.learningtracker.util.JwtUtil=DEBUG
+logging.level.com.xsh.learningtracker.config.JwtAuthFilter=DEBUG
+
+# ImgBB 图床配置
+imgbb.api.key=7c48d09e67722d3827c9199328a6d4bd
+imgbb.api.url=https://api.imgbb.com/1/upload
+# 文件上传大小限制配置
+spring.servlet.multipart.max-file-size=10MB
+spring.servlet.multipart.max-request-size=20MB

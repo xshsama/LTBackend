@@ -49,7 +49,6 @@ public class TaskServiceImpl implements TaskService {
         task.setTitle(taskDetails.getTitle());
         task.setStatus(taskDetails.getStatus());
         task.setCompletionDate(taskDetails.getCompletionDate());
-        task.setMetadata(taskDetails.getMetadata());
         if (taskDetails.getTags() != null && !taskDetails.getTags().isEmpty()) {
             task.setTags(taskDetails.getTags());
         }

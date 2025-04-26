@@ -59,9 +59,6 @@ public class BaseTask {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Column(name = "metadata")
-    private String metadata; // JSON格式存储的扩展字段，包括难度和能量消耗等
-
     @ManyToOne
     @JoinColumn(name = "goal_id", nullable = false)
     private Goal goal;
@@ -83,7 +80,7 @@ public class BaseTask {
 
     // 通用的任务状态枚举
     public enum Status {
-        ACTIVE, PAUSED, ARCHIVED
+        ACTIVE, ARCHIVED, BLOCKED, COMPLETED, IN_PROGRESS, NOT_STARTED, OVERDUE, PAUSED
     }
 
     // 任务类型枚举

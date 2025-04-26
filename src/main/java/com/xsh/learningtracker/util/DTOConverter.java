@@ -145,7 +145,6 @@ public class DTOConverter {
         dto.setCreatedAt(task.getCreatedAt());
         dto.setUpdatedAt(task.getUpdatedAt());
         dto.setGoalId(task.getGoal().getId());
-        dto.setMetadata(task.getMetadata());
 
         // 根据任务类型添加特定字段
         if (task instanceof StepTask) {
@@ -216,6 +215,8 @@ public class DTOConverter {
                 break;
             case CREATIVE:
                 task = new CreativeTask();
+                // 设置默认的创作阶段，避免null值导致discriminator错误
+                ((CreativeTask) task).setCurrentPhase(CreativeTask.CreativePhase.DRAFTING);
                 if (request.getPublicationFormats() != null) {
                     ((CreativeTask) task).setPublicationFormats(request.getPublicationFormats());
                 }
@@ -231,17 +232,25 @@ public class DTOConverter {
         task.setTitle(request.getTitle());
         task.setType(request.getType());
         task.setGoal(goal);
+
+        // 确保设置默认状态，防止discriminator值为空
         task.setStatus(BaseTask.Status.ACTIVE);
-        task.setMetadata(request.getMetadata());
 
         return task;
     }
 
     public static BaseTask toBaseTask(TaskDTO.UpdateTaskRequest request, BaseTask existingTask) {
         existingTask.setTitle(request.getTitle());
-        existingTask.setStatus(request.getStatus());
+
+        // 确保设置状态，防止discriminator值为空
+        if (request.getStatus() != null) {
+            existingTask.setStatus(request.getStatus());
+        } else {
+            // 确保始终有一个有效的状态
+            existingTask.setStatus(BaseTask.Status.ACTIVE);
+        }
+
         existingTask.setCompletionDate(request.getCompletionDate());
-        existingTask.setMetadata(request.getMetadata());
 
         // 根据具体任务类型设置特定字段
         if (existingTask instanceof StepTask && request.getStepsJson() != null) {

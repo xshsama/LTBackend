@@ -22,6 +22,7 @@ public class SubjectDTO {
     // 关联数据
     private CategoryDTO category;
     private List<String> tags;
+    private List<TaskDTO> goals;
 
     // 用于创建和更新的内部类
     @Data

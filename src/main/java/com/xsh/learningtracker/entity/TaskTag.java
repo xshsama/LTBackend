@@ -30,7 +30,7 @@ public class TaskTag {
 
     @ManyToOne
     @JoinColumn(name = "task_id")
-    private Task task;
+    private BaseTask task;
 
     @ManyToOne
     @JoinColumn(name = "tag_id")

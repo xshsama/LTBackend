@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.xsh.learningtracker.dto.ApiResponse;
 import com.xsh.learningtracker.dto.TagDTO;
 import com.xsh.learningtracker.dto.TaskTagRequestDTO;
+import com.xsh.learningtracker.entity.BaseTask;
 import com.xsh.learningtracker.entity.Tag;
-import com.xsh.learningtracker.entity.Task;
 import com.xsh.learningtracker.service.TaskTagService;
 
 import lombok.RequiredArgsConstructor;
@@ -83,8 +83,8 @@ public class TaskTagController {
      * 获取带有特定标签的所有任务
      */
     @GetMapping("/tag/{tagId}/tasks")
-    public ResponseEntity<ApiResponse<List<Task>>> getTasksByTagId(@PathVariable Integer tagId) {
-        List<Task> tasks = taskTagService.getTasksByTagId(tagId);
+    public ResponseEntity<ApiResponse<List<BaseTask>>> getTasksByTagId(@PathVariable Integer tagId) {
+        List<BaseTask> tasks = taskTagService.getTasksByTagId(tagId);
         return ResponseEntity.ok(ApiResponse.success("获取标签相关任务成功", tasks));
     }
 

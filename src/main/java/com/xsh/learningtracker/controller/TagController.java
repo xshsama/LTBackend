@@ -38,7 +38,7 @@ public class TagController {
         Integer userId = userService.findByUsername(username).getId();
         List<Tag> tags = tagService.getTagsByUserId(userId);
         List<TagDTO> tagDTOs = tags.stream()
-                .map(tag -> new TagDTO(tag.getId(), tag.getName(), tag.getColor()))
+                .map(tag -> new TagDTO(tag.getId(), tag.getName(), tag.getColor(), userId))
                 .toList();
         return ResponseEntity.ok(tagDTOs);
     }
@@ -46,7 +46,8 @@ public class TagController {
     @GetMapping("/{id}")
     public ResponseEntity<TagDTO> getTagById(@PathVariable Integer id) {
         Tag tag = tagService.getTagById(id);
-        return ResponseEntity.ok(new TagDTO(tag.getId(), tag.getName(), tag.getColor()));
+        Integer userId = tag.getUser() != null ? tag.getUser().getId() : null;
+        return ResponseEntity.ok(new TagDTO(tag.getId(), tag.getName(), tag.getColor(), userId));
     }
 
     @PostMapping
@@ -55,7 +56,8 @@ public class TagController {
         String username = authentication.getName();
         tag.setUser(userService.findByUsername(username));
         Tag createdTag = tagService.createTag(tag);
-        return ResponseEntity.ok(new TagDTO(createdTag.getId(), createdTag.getName(), createdTag.getColor()));
+        Integer userId = createdTag.getUser() != null ? createdTag.getUser().getId() : null;
+        return ResponseEntity.ok(new TagDTO(createdTag.getId(), createdTag.getName(), createdTag.getColor(), userId));
     }
 
     @PutMapping("/{id}")

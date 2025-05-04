@@ -22,22 +22,10 @@ public class TaskDTO {
     private List<TagDTO> tags = new ArrayList<>();
     private String metadata; // 存储扩展属性的JSON字符串
 
-    // 步骤型任务特有属性
-    private Integer completedSteps;
-    private Integer blockedSteps;
-    private Integer validationScore;
-
-    // 习惯型任务特有属性
-    private String frequency;
-    private String daysOfWeek;
-    private Integer currentStreak;
-    private Integer longestStreak;
-    private LocalDate lastCompleted;
-
-    // 创意型任务特有属性
-    private String currentPhase;
-    private String publicationFormats;
-    private String licenseType;
+    // 特定任务类型的详细信息(组合模式)
+    private StepTaskDetailDTO stepTaskDetail;
+    private HabitTaskDetailDTO habitTaskDetail;
+    private CreativeTaskDetailDTO creativeTaskDetail;
 
     // 用于创建任务的请求类
     @Data

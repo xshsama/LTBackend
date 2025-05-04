@@ -8,8 +8,11 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xsh.learningtracker.dto.CategoryDTO;
+import com.xsh.learningtracker.dto.CreativeTaskDetailDTO;
 import com.xsh.learningtracker.dto.GoalDTO;
 import com.xsh.learningtracker.dto.GoalDTO.UpdateGoalRequest;
+import com.xsh.learningtracker.dto.HabitTaskDetailDTO;
+import com.xsh.learningtracker.dto.StepTaskDetailDTO;
 import com.xsh.learningtracker.dto.SubjectDTO;
 import com.xsh.learningtracker.dto.TagDTO;
 import com.xsh.learningtracker.dto.TaskDTO;
@@ -149,21 +152,27 @@ public class DTOConverter {
         // 根据任务类型添加特定字段
         if (task instanceof StepTask) {
             StepTask stepTask = (StepTask) task;
-            dto.setCompletedSteps(stepTask.getCompletedSteps());
-            dto.setBlockedSteps(stepTask.getBlockedSteps());
-            dto.setValidationScore(stepTask.getValidationScore());
+            StepTaskDetailDTO detail = new StepTaskDetailDTO();
+            detail.setCompletedSteps(stepTask.getCompletedSteps());
+            detail.setBlockedSteps(stepTask.getBlockedSteps());
+            dto.setStepTaskDetail(detail);
         } else if (task instanceof HabitTask) {
             HabitTask habitTask = (HabitTask) task;
-            dto.setFrequency(habitTask.getFrequency());
-            dto.setDaysOfWeek(habitTask.getDaysOfWeekJson());
-            dto.setCurrentStreak(habitTask.getCurrentStreak());
-            dto.setLongestStreak(habitTask.getLongestStreak());
-            dto.setLastCompleted(habitTask.getLastCompleted());
+            HabitTaskDetailDTO detail = new HabitTaskDetailDTO();
+            detail.setFrequency(habitTask.getFrequency());
+            detail.setDaysOfWeek(habitTask.getDaysOfWeekJson());
+            detail.setCurrentStreak(habitTask.getCurrentStreak());
+            detail.setLongestStreak(habitTask.getLongestStreak());
+            detail.setLastCompleted(habitTask.getLastCompleted());
+            dto.setHabitTaskDetail(detail);
         } else if (task instanceof CreativeTask) {
             CreativeTask creativeTask = (CreativeTask) task;
-            dto.setCurrentPhase(creativeTask.getCurrentPhase().toString());
-            dto.setPublicationFormats(creativeTask.getPublicationFormats());
-            dto.setLicenseType(creativeTask.getLicenseType());
+            CreativeTaskDetailDTO detail = new CreativeTaskDetailDTO();
+            detail.setCurrentPhase(creativeTask.getCurrentPhase().toString());
+            detail.setPublicationFormats(creativeTask.getPublicationFormats());
+            detail.setLicenseType(creativeTask.getLicenseType());
+            detail.setValidationScore(creativeTask.getValidationScore());
+            dto.setCreativeTaskDetail(detail);
         }
 
         // 收集任务的所有标签

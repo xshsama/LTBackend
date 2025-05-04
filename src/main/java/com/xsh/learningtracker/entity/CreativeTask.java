@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -140,5 +142,42 @@ public class CreativeTask extends BaseTask {
     // 许可证类型枚举
     public enum LicenseType {
         CC_BY, ALL_RIGHTS_RESERVED
+    }
+
+    /**
+     * 计算并返回验证分数
+     * 基于所有反馈的平均分计算
+     */
+    public Integer getValidationScore() {
+        try {
+            if (feedbacksJson == null || feedbacksJson.isEmpty()) {
+                return null;
+            }
+
+            ObjectMapper mapper = new ObjectMapper();
+            Feedback[] feedbacks = mapper.readValue(feedbacksJson, Feedback[].class);
+
+            if (feedbacks.length == 0) {
+                return null;
+            }
+
+            double total = 0;
+            int count = 0;
+
+            for (Feedback feedback : feedbacks) {
+                if (feedback.getCreativityRating() != null) {
+                    total += feedback.getCreativityRating();
+                    count++;
+                }
+                if (feedback.getLogicRating() != null) {
+                    total += feedback.getLogicRating();
+                    count++;
+                }
+            }
+
+            return count > 0 ? (int) Math.round(total / count) : null;
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

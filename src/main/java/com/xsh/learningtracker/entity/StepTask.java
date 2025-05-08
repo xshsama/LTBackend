@@ -42,13 +42,9 @@ public class StepTask extends BaseTask {
         private StepStatus status = StepStatus.PENDING;
         private CompletionRule completionRules = new CompletionRule();
 
-        // 新增：是否作为独立的待办事项清单
-        private boolean asTodoList = false;
-        // 新增：待办事项列表
-        private List<TodoItem> todoItems = new ArrayList<>();
-        // 新增：描述信息
+        // 描述信息
         private String description;
-        // 新增：预计完成时间（分钟）
+        // 预计完成时间（分钟）
         private Integer estimatedDuration;
 
         // Getters and setters
@@ -100,22 +96,6 @@ public class StepTask extends BaseTask {
             this.completionRules = completionRules;
         }
 
-        public boolean isAsTodoList() {
-            return asTodoList;
-        }
-
-        public void setAsTodoList(boolean asTodoList) {
-            this.asTodoList = asTodoList;
-        }
-
-        public List<TodoItem> getTodoItems() {
-            return todoItems;
-        }
-
-        public void setTodoItems(List<TodoItem> todoItems) {
-            this.todoItems = todoItems;
-        }
-
         public String getDescription() {
             return description;
         }
@@ -130,59 +110,6 @@ public class StepTask extends BaseTask {
 
         public void setEstimatedDuration(Integer estimatedDuration) {
             this.estimatedDuration = estimatedDuration;
-        }
-
-        /**
-         * 添加待办事项
-         * 
-         * @param todoItem 待办事项
-         */
-        public void addTodoItem(TodoItem todoItem) {
-            if (todoItems == null) {
-                todoItems = new ArrayList<>();
-            }
-            todoItems.add(todoItem);
-        }
-
-        /**
-         * 计算待办事项的完成进度（百分比）
-         * 
-         * @return 完成百分比 (0-100)
-         */
-        public int calculateTodoProgress() {
-            if (todoItems == null || todoItems.isEmpty()) {
-                return 0;
-            }
-
-            long completed = todoItems.stream()
-                    .filter(TodoItem::isCompleted)
-                    .count();
-
-            return (int) ((completed * 100) / todoItems.size());
-        }
-
-        /**
-         * 更新步骤状态基于待办事项完成情况
-         * 如果所有待办事项都完成，则将步骤状态设置为DONE
-         */
-        public void updateStatusBasedOnTodoItems() {
-            if (!asTodoList || todoItems == null || todoItems.isEmpty()) {
-                return;
-            }
-
-            boolean allCompleted = todoItems.stream()
-                    .allMatch(TodoItem::isCompleted);
-
-            if (allCompleted) {
-                this.status = StepStatus.DONE;
-            } else {
-                // 如果有任何一个待办事项已经完成，则标记为进行中
-                boolean anyCompleted = todoItems.stream()
-                        .anyMatch(TodoItem::isCompleted);
-                if (anyCompleted) {
-                    this.status = StepStatus.IN_PROGRESS;
-                }
-            }
         }
     }
 

@@ -27,13 +27,11 @@ import com.xsh.learningtracker.dto.ApiResponse;
 import com.xsh.learningtracker.dto.CreativeTaskDTO;
 import com.xsh.learningtracker.dto.HabitTaskDTO;
 import com.xsh.learningtracker.dto.StepTaskDTO;
-import com.xsh.learningtracker.dto.StepTaskDetailDTO;
 import com.xsh.learningtracker.dto.TaskDTO;
 import com.xsh.learningtracker.entity.BaseTask;
 import com.xsh.learningtracker.entity.CreativeTask;
 import com.xsh.learningtracker.entity.HabitTask;
 import com.xsh.learningtracker.entity.StepTask;
-import com.xsh.learningtracker.entity.TodoItem;
 import com.xsh.learningtracker.service.GoalService;
 import com.xsh.learningtracker.service.TaskService;
 import com.xsh.learningtracker.service.UserService;
@@ -626,25 +624,7 @@ public class TaskController {
                     stepDTO.setStatus(step.getStatus());
                     stepDTO.setOrder(step.getOrder() != null ? step.getOrder().intValue() : null);
 
-                    // 处理待办事项列表相关属性
-                    stepDTO.setAsTodoList(step.isAsTodoList());
-
-                    // 处理todoItems - 确保设置为空数组而不是null
-                    List<StepTaskDetailDTO.TodoItemDTO> todoItemDTOs = new ArrayList<>();
-                    if (step.getTodoItems() != null && !step.getTodoItems().isEmpty()) {
-                        for (TodoItem item : step.getTodoItems()) {
-                            StepTaskDetailDTO.TodoItemDTO todoItemDTO = new StepTaskDetailDTO.TodoItemDTO();
-                            todoItemDTO.setId(item.getId());
-                            todoItemDTO.setContent(item.getContent());
-                            todoItemDTO.setCompleted(item.isCompleted());
-                            todoItemDTO.setCreatedAt(item.getCreatedAt());
-                            todoItemDTO.setCompletedAt(item.getCompletedAt());
-                            todoItemDTO.setPriority(item.getPriority());
-                            todoItemDTO.setNotes(item.getNotes());
-                            todoItemDTOs.add(todoItemDTO);
-                        }
-                    }
-                    stepDTO.setTodoItems(todoItemDTOs); // 即使为空也设置数组
+                    // 已移除待办事项相关代码
 
                     stepDTOs.add(stepDTO);
                 }
@@ -724,65 +704,149 @@ public class TaskController {
             org.springframework.security.core.Authentication authentication) {
         logRequestHeaders("updateTaskSteps");
 
-        // 从认证上下文获取用户信息
-        String username = authentication.getName();
-        Integer userId = userService.findByUsername(username).getId();
+        String username = null;
+        Integer userId = null;
+        com.xsh.learningtracker.entity.User currentUser = null; // 使用完整类名避免与可能的局部变量冲突
 
+        // 1. 检查认证对象本身
+        if (authentication == null || !authentication.isAuthenticated()) {
+            logger.error("Authentication object is null or not authenticated for updateTaskSteps (Task ID: {}).", id);
+            // 对于未认证的请求，应该返回401 Unauthorized
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error(401, "用户未认证或认证信息无效"));
+        }
+
+        // 2. 安全地获取用户名
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof org.springframework.security.core.userdetails.UserDetails) {
+            username = ((org.springframework.security.core.userdetails.UserDetails) principal).getUsername();
+        } else if (principal instanceof String) {
+            username = (String) principal;
+        } else {
+            // Fallback or handle unexpected principal type
+            username = authentication.getName();
+            logger.warn(
+                    "Principal is not UserDetails or String for updateTaskSteps (Task ID: {}), using authentication.getName(): {}",
+                    id, username);
+        }
+
+        logger.info("Attempting to update steps for task ID {}. Authenticated username from principal: {}", id,
+                username);
+        logger.info("Authentication authorities for user '{}': {}", username, authentication.getAuthorities());
+
+        // 3. 检查用户名是否有效
+        if (username == null || username.trim().isEmpty()) {
+            logger.error(
+                    "Username could not be extracted or is empty from authentication principal for updateTaskSteps (Task ID: {}).",
+                    id);
+            // 如果无法获取用户名，视为认证问题
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error(401, "无法从认证信息中提取有效的用户名"));
+        }
+
+        // 4. 安全地获取用户实体和ID
         try {
-            // 验证任务存在
-            if (!taskService.existsById(id)) {
-                return ResponseEntity.badRequest().body(ApiResponse.error(404, "任务不存在"));
+            currentUser = userService.findByUsername(username);
+            if (currentUser == null) {
+                logger.error("User not found in database for username: {} during updateTaskSteps (Task ID: {}).",
+                        username, id);
+                // 用户在JWT中存在但在数据库中找不到，这可能是数据不一致或认证问题
+                return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED)
+                        .body(ApiResponse.error(401, "用户信息无效或在数据库中未找到"));
             }
+            userId = currentUser.getId();
+            logger.info("Successfully fetched userId: {} for username: {} (Task ID: {})", userId, username, id);
+        } catch (Exception e) {
+            logger.error("Error fetching user by username '{}' for updateTaskSteps (Task ID: {}): {}", username, id,
+                    e.getMessage(), e);
+            // 获取用户信息时发生内部错误
+            return ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(500, "获取用户信息时发生内部错误"));
+        }
 
-            // 获取任务
+        // 5. 主业务逻辑 (现在可以假设 userId 是有效的)
+        try {
+            // 验证任务存在 (getTaskById 会在找不到时抛异常)
             BaseTask baseTask = taskService.getTaskById(id);
+            // 注意：getTaskById 内部没有用户校验，如果需要所有权校验，需要在这里添加：
+            // if (!baseTask.getGoal().getSubject().getUser().getId().equals(userId)) {
+            // logger.warn("User {} (ID:{}) attempting to update task {} not owned by them
+            // (Owner ID: {}).", username, userId, id,
+            // baseTask.getGoal().getSubject().getUser().getId());
+            // return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN)
+            // .body(ApiResponse.error(403, "权限不足，无法更新此任务的步骤"));
+            // }
 
             // 验证是步骤型任务
             if (!(baseTask instanceof StepTask)) {
-                return ResponseEntity.badRequest().body(ApiResponse.error(400, "不是步骤型任务"));
+                logger.warn("Task ID {} is not a StepTask, cannot update steps.", id);
+                return ResponseEntity.badRequest().body(ApiResponse.error(400, "任务不是步骤型任务"));
             }
 
             // 更新步骤信息
             StepTask task = (StepTask) baseTask;
-            task.setStepsJson(requestBody.getStepsJson());
+            // 检查传入的stepsJson是否为null，避免NPE
+            String stepsJsonFromRequest = requestBody.getStepsJson();
+            if (stepsJsonFromRequest == null) {
+                logger.warn("Received null stepsJson for task ID {}. Steps will not be updated.", id);
+                // 根据业务逻辑决定是否需要返回错误，或者允许清空步骤
+                // return ResponseEntity.badRequest().body(ApiResponse.error(400, "步骤信息不能为空"));
+                // 或者允许更新，但stepsJson字段会是null
+                task.setStepsJson(null);
+                task.setCompletedSteps(0); // 如果允许清空，重置计数
+                task.setBlockedSteps(0);
+            } else {
+                task.setStepsJson(stepsJsonFromRequest);
+                // 重新计算完成的步骤数
+                try {
+                    List<StepTask.Step> steps = objectMapper.readValue(
+                            stepsJsonFromRequest,
+                            objectMapper.getTypeFactory().constructCollectionType(List.class, StepTask.Step.class));
 
-            // 重新计算完成的步骤数
-            try {
-                List<StepTask.Step> steps = objectMapper.readValue(
-                        requestBody.getStepsJson(),
-                        objectMapper.getTypeFactory().constructCollectionType(List.class, StepTask.Step.class));
+                    long completedStepsCount = steps.stream()
+                            .filter(step -> step.getStatus() == StepTask.StepStatus.DONE)
+                            .count();
 
-                // 计算完成的步骤数和被阻塞的步骤数
-                long completedSteps = steps.stream()
-                        .filter(step -> step.getStatus() == StepTask.StepStatus.DONE ||
-                                (step.isAsTodoList() && step.getTodoItems() != null &&
-                                        !step.getTodoItems().isEmpty() &&
-                                        step.getTodoItems().stream().allMatch(TodoItem::isCompleted)))
-                        .count();
+                    long blockedStepsCount = steps.stream()
+                            .filter(step -> step.getStatus() == StepTask.StepStatus.BLOCKED)
+                            .count();
 
-                long blockedSteps = steps.stream()
-                        .filter(step -> step.getStatus() == StepTask.StepStatus.BLOCKED)
-                        .count();
+                    task.setCompletedSteps((int) completedStepsCount);
+                    task.setBlockedSteps((int) blockedStepsCount);
+                    logger.debug("Task ID {}: Recalculated completedSteps: {}, blockedSteps: {}", id,
+                            completedStepsCount, blockedStepsCount);
 
-                // 更新步骤统计
-                task.setCompletedSteps((int) completedSteps);
-                task.setBlockedSteps((int) blockedSteps);
-
-            } catch (Exception e) {
-                logger.error("解析步骤JSON失败: " + e.getMessage(), e);
-                // 如果解析失败，不更新完成步骤数，但仍然保存steps JSON
+                } catch (com.fasterxml.jackson.core.JsonProcessingException e) { // 更具体的异常类型
+                    logger.error("Failed to parse stepsJson for task ID {}: {}", id, e.getMessage());
+                    // 返回400 Bad Request，因为客户端发送了无法解析的JSON
+                    return ResponseEntity.badRequest().body(ApiResponse.error(400, "步骤数据格式错误: " + e.getMessage()));
+                }
             }
 
             // 保存任务
             StepTask updatedTask = taskService.updateStepTask(id, task);
+            logger.info("Successfully updated steps for task ID {}", id);
 
             // 转换为DTO并返回
-            StepTaskDTO dto = convertToStepTaskDTO(updatedTask);
+            StepTaskDTO dto = convertToStepTaskDTO(updatedTask); // Ensure this method handles potential nulls
+                                                                 // gracefully
+            if (dto == null) {
+                logger.error("Failed to convert updated StepTask (ID: {}) to DTO.", id);
+                return ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(ApiResponse.error(500, "任务更新成功但无法生成响应数据"));
+            }
             return ResponseEntity.ok(ApiResponse.success("步骤更新成功", dto));
 
-        } catch (Exception e) {
-            logger.error("更新步骤失败: " + e.getMessage(), e);
-            return ResponseEntity.badRequest().body(ApiResponse.error(500, "更新步骤失败: " + e.getMessage()));
+        } catch (RuntimeException e) { // Catching RuntimeException from getTaskById or other issues
+            logger.error("Error during updateTaskSteps processing for task ID {}: {}", id, e.getMessage(), e);
+            // 区分任务未找到和其他运行时错误
+            if (e.getMessage() != null && e.getMessage().contains("Task not found")) {
+                return ResponseEntity.status(org.springframework.http.HttpStatus.NOT_FOUND) // 使用 404 Not Found 更合适
+                        .body(ApiResponse.error(404, "任务不存在"));
+            }
+            // 对于其他运行时异常，返回500
+            return ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(500, "更新步骤时发生内部错误: " + e.getMessage()));
         }
     }
 

@@ -30,8 +30,6 @@ public class StepTaskDTO extends TaskDTO {
         private String description; // 步骤描述
         private StepTask.StepStatus status; // 步骤状态
         private Integer order; // 步骤顺序
-        private boolean asTodoList; // 是否作为待办事项列表
-        private List<StepTaskDetailDTO.TodoItemDTO> todoItems; // 待办事项列表
     }
 
     /**

@@ -249,26 +249,44 @@ public class DTOConverter {
     }
 
     public static BaseTask toBaseTask(TaskDTO.UpdateTaskRequest request, BaseTask existingTask) {
-        existingTask.setTitle(request.getTitle());
-
-        // 确保设置状态，防止discriminator值为空
-        if (request.getStatus() != null) {
-            existingTask.setStatus(request.getStatus());
-        } else {
-            // 确保始终有一个有效的状态
-            existingTask.setStatus(BaseTask.Status.ACTIVE);
+        // 只有当请求中明确提供了title时才更新
+        if (request.getTitle() != null) {
+            existingTask.setTitle(request.getTitle());
         }
 
-        existingTask.setCompletionDate(request.getCompletionDate());
+        // 只有当请求中明确提供了status时才更新
+        if (request.getStatus() != null) {
+            existingTask.setStatus(request.getStatus());
+        }
+        // 注意：如果业务逻辑要求在request.status为null时设置默认值，则需要额外处理，
+        // 但通常更新操作不应随意更改未指定更新的字段的状态。
+        // BaseTask实体本身有status的默认值和nullable=false约束，所以existingTask.status不应为null。
 
-        // 根据具体任务类型设置特定字段
-        if (existingTask instanceof StepTask && request.getStepsJson() != null) {
-            ((StepTask) existingTask).setStepsJson(request.getStepsJson());
+        // 只有当请求中明确提供了completionDate时才更新 (允许设为null以清除日期)
+        if (request.getCompletionDate() != null || request.getStatus() == BaseTask.Status.ARCHIVED
+                || request.getStatus() == BaseTask.Status.COMPLETED) {
+            // 如果状态是完成/归档，即使没传日期，也可能需要设置。或者，如果传了日期就用传的。
+            // 这里简化为：如果请求中提供了completionDate，就用它。
+            // 如果你的业务逻辑是“当状态变为COMPLETED/ARCHIVED时自动设置completionDate”，
+            // 那么这个逻辑应该在Service层，而不是DTO转换层。
+            // 或者，如果允许通过API将completionDate设为null，则需要更复杂的逻辑。
+            // 目前，如果request.getCompletionDate()是null，则不更新。
+            if (request.getCompletionDate() != null) {
+                existingTask.setCompletionDate(request.getCompletionDate());
+            }
+        }
+
+        // 根据具体任务类型设置特定字段 (只在提供时更新)
+        if (existingTask instanceof StepTask) {
+            StepTask stepTask = (StepTask) existingTask;
+            if (request.getStepsJson() != null) {
+                stepTask.setStepsJson(request.getStepsJson());
+            }
             if (request.getCompletedSteps() != null) {
-                ((StepTask) existingTask).setCompletedSteps(request.getCompletedSteps());
+                stepTask.setCompletedSteps(request.getCompletedSteps());
             }
             if (request.getBlockedSteps() != null) {
-                ((StepTask) existingTask).setBlockedSteps(request.getBlockedSteps());
+                stepTask.setBlockedSteps(request.getBlockedSteps());
             }
         } else if (existingTask instanceof HabitTask) {
             HabitTask habitTask = (HabitTask) existingTask;

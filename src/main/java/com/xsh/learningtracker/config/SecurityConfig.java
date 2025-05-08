@@ -64,7 +64,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable) // 恢复为标准的禁用方式
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 // 在UsernamePasswordAuthenticationFilter之前添加JWT过滤器
@@ -85,7 +85,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/tags/**").authenticated() // 修改标签需要认证
                         .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll() // 允许获取分类
                         .requestMatchers(HttpMethod.POST, "/api/categories/**").authenticated() // 修改分类需要认证
-                        .requestMatchers("/api/tasks/**").authenticated() // 所有任务相关API都需要认证（任何HTTP方法）
+                        .requestMatchers("/api/tasks/**").authenticated() // 保持这个规则
+                        // .requestMatchers(HttpMethod.PUT, "/api/tasks/**").authenticated() //
+                        // 暂时注释掉这条更具体的规则进行测试
                         .anyRequest().authenticated())
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)

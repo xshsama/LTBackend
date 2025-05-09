@@ -25,11 +25,13 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.EqualsAndHashCode; // Import EqualsAndHashCode
 
 /**
  * 任务基础类，用于继承扩展不同类型的任务
  */
 @Data
+@EqualsAndHashCode(callSuper = false, exclude = { "goal", "tags" }) // Exclude associations and collections
 @Entity
 @Table(name = "tasks")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)

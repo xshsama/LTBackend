@@ -45,7 +45,7 @@ public class Subject {
 
     public Set<Tag> getTags() {
         return goals.stream()
-                .flatMap(goal -> goal.getTags().stream())
+                .flatMap(goal -> goal.getAllTags().stream()) // Use getAllTags to include tags from tasks
                 .collect(java.util.stream.Collectors.toSet());
     }
 

@@ -22,8 +22,11 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.EqualsAndHashCode; // Import EqualsAndHashCode
 
 @Data
+@EqualsAndHashCode(callSuper = false, exclude = { "subject", "category", "tasks", "tags" }) // Exclude associations and
+                                                                                            // collections
 @Entity
 @Table(name = "goals")
 public class Goal {

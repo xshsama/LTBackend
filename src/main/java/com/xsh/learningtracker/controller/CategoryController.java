@@ -1,7 +1,5 @@
 package com.xsh.learningtracker.controller;
 
-import java.util.List;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,7 +24,7 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @GetMapping
-    public ResponseEntity<List<Category>> getCategories(@RequestParam(required = false) Integer subjectId) {
+    public ResponseEntity<?> getCategories(@RequestParam(required = false) Integer subjectId) {
         if (subjectId != null) {
             return ResponseEntity.ok(categoryService.getCategoriesBySubjectId(subjectId));
         }

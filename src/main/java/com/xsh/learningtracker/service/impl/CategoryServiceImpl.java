@@ -1,9 +1,11 @@
 package com.xsh.learningtracker.service.impl;
 
 import java.util.List;
+import java.util.stream.Collectors; // Import Collectors
 
 import org.springframework.stereotype.Service;
 
+import com.xsh.learningtracker.dto.CategoryDTO; // Import CategoryDTO
 import com.xsh.learningtracker.entity.Category;
 import com.xsh.learningtracker.repository.CategoryRepository;
 import com.xsh.learningtracker.service.CategoryService;
@@ -22,8 +24,12 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<Category> getCategoriesBySubjectId(Integer subjectId) {
-        return categoryRepository.findBySubjectIdViaSubjectCategory(subjectId);
+    public List<CategoryDTO> getCategoriesBySubjectId(Integer subjectId) {
+        // Corrected to use the method that queries via the intermediate table
+        List<Category> categories = categoryRepository.findBySubjectIdViaSubjectCategory(subjectId);
+        return categories.stream()
+                .map(this::convertToDTO) // Convert each entity to DTO
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -63,5 +69,19 @@ public class CategoryServiceImpl implements CategoryService {
     public void deleteCategory(Integer id) {
         Category category = getCategoryById(id);
         categoryRepository.delete(category);
+    }
+
+    // Helper method to convert Category entity to CategoryDTO
+    private CategoryDTO convertToDTO(Category category) {
+        CategoryDTO dto = new CategoryDTO();
+        dto.setId(category.getId());
+        dto.setName(category.getName());
+        // Removed setting subjectId from category.getSubject() as the field no longer
+        // exists.
+        // CategoryDTO.subjectId might need to be populated differently if required,
+        // or removed from CategoryDTO if it doesn't make sense in a ManyToMany context
+        // from this direction.
+        dto.setSubjectId(null); // Set to null for now
+        return dto;
     }
 }

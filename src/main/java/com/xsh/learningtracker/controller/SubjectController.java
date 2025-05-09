@@ -16,9 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.xsh.learningtracker.dto.ApiResponse;
+import com.xsh.learningtracker.dto.CategoryDTO; // Import CategoryDTO
 import com.xsh.learningtracker.dto.SubjectDTO;
 import com.xsh.learningtracker.entity.Subject;
 import com.xsh.learningtracker.entity.User;
+import com.xsh.learningtracker.service.CategoryService; // Import CategoryService
 import com.xsh.learningtracker.service.UserService;
 import com.xsh.learningtracker.service.impl.SubjectServiceImpl;
 
@@ -31,6 +33,9 @@ public class SubjectController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private CategoryService categoryService; // Inject CategoryService
 
     /**
      * 获取当前用户的所有学科
@@ -84,7 +89,8 @@ public class SubjectController {
         Subject subject = new Subject();
         subject.setTitle(request.getTitle());
 
-        Subject createdSubject = subjectService.createSubject(subject, user.getId());
+        // Pass categoryId to the service method
+        Subject createdSubject = subjectService.createSubject(subject, user.getId(), request.getCategoryId());
         SubjectDTO subjectDTO = subjectService.convertToDTO(createdSubject);
 
         return ResponseEntity.ok(ApiResponse.success("创建学科成功", subjectDTO));
@@ -112,7 +118,8 @@ public class SubjectController {
         }
 
         subject.setTitle(request.getTitle());
-        Subject updatedSubject = subjectService.updateSubject(id, subject);
+        // Pass categoryId to the service method
+        Subject updatedSubject = subjectService.updateSubject(id, subject, request.getCategoryId());
         SubjectDTO subjectDTO = subjectService.convertToDTO(updatedSubject);
 
         return ResponseEntity.ok(ApiResponse.success("更新学科成功", subjectDTO));
@@ -140,5 +147,25 @@ public class SubjectController {
 
         subjectService.deleteSubject(id);
         return ResponseEntity.ok(ApiResponse.success("删除学科成功", null));
+    }
+
+    /**
+     * 获取指定学科下的所有分类
+     */
+    @GetMapping("/{subjectId}/categories")
+    public ResponseEntity<ApiResponse<List<CategoryDTO>>> getCategoriesBySubject(
+            @PathVariable Integer subjectId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        // 检查用户是否已登录 (可以添加更细致的权限检查，例如用户是否拥有该学科)
+        if (userDetails == null) {
+            return ResponseEntity.ok(ApiResponse.error(401, "用户未登录"));
+        }
+
+        // TODO: 可以添加逻辑验证 subjectId 是否存在以及用户是否有权访问
+
+        List<CategoryDTO> categories = categoryService.getCategoriesBySubjectId(subjectId);
+
+        return ResponseEntity.ok(ApiResponse.success("获取学科分类成功", categories));
     }
 }

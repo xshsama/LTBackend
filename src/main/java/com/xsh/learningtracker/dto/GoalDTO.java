@@ -4,8 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.xsh.learningtracker.entity.Goal;
-import com.xsh.learningtracker.entity.Tag;
+import com.xsh.learningtracker.entity.Goal; // For enums
 
 import lombok.Data;
 
@@ -13,59 +12,42 @@ import lombok.Data;
 public class GoalDTO {
     private Integer id;
     private String title;
-    private Goal.Status status;
-    private Goal.Priority priority;
-    private Integer progress;
+    private Goal.Status status; // Using the enum from Goal entity
     private LocalDate completionDate;
+    private Goal.Priority priority; // Using the enum from Goal entity
+    private Integer progress;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Integer categoryId;
-    private Integer subjectId;
-
-    // 统计信息
+    private CategoryDTO category;
+    private Integer subjectId; // Added Subject ID
+    private String subjectTitle; // Added Subject Title
+    private List<String> tags; // Combined tags from Goal and its Tasks
     private Integer totalTasks;
     private Integer completedTasks;
-    private Integer remainingTasks;
-    private Double completionRate;
-    private List<Tag> tags;
+    // Optionally, could include List<TaskDTO> tasks if needed in the future
 
-    // 用于创建和更新的内部类
     @Data
     public static class CreateGoalRequest {
         private String title;
-        private Goal.Priority priority = Goal.Priority.MEDIUM;
-        private Integer categoryId;
+        private Goal.Priority priority;
         private Integer subjectId;
-        private List<Tag> tags;
+        private Integer categoryId; // Optional: for associating with a category upon creation
+        private LocalDate completionDate; // Optional: target completion date
     }
 
     @Data
     public static class UpdateGoalRequest {
         private String title;
         private Goal.Status status;
+        private LocalDate completionDate;
         private Goal.Priority priority;
-        private Integer categoryId;
-        private List<Tag> tags;
+        private Integer progress;
+        private Integer categoryId; // To update category association
     }
 
     @Data
     public static class UpdateGoalProgressRequest {
         private Integer progress;
-    }
-
-    @Data
-    public static class GoalStats {
-        private Integer totalTasks = 0;
-        private Integer completedTasks = 0;
-        private Integer remainingTasks = 0;
-        private Double completionRate = 0.0;
-
-        public void calculateStats(Integer total, Integer completed) {
-            this.totalTasks = total;
-            this.completedTasks = completed;
-            this.remainingTasks = total - completed;
-            this.completionRate = total > 0 ? (completed * 100.0) / total : 0.0;
-        }
     }
 
     @Data

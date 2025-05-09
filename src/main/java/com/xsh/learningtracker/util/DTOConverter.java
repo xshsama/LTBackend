@@ -91,46 +91,73 @@ public class DTOConverter {
         dto.setCompletionDate(goal.getCompletionDate());
         dto.setCreatedAt(goal.getCreatedAt());
         dto.setUpdatedAt(goal.getUpdatedAt());
-        dto.setCategoryId(goal.getCategory() != null ? goal.getCategory().getId() : null);
-        dto.setSubjectId(goal.getSubject().getId());
-
-        // 设置统计信息
-        dto.setTotalTasks(goal.getTasks().size());
-        // 修改不兼容的Status比较
-        dto.setCompletedTasks((int) goal.getTasks().stream()
-                .filter(t -> {
-                    if (t.getStatus() != null) {
-                        return t.getStatus().equals(BaseTask.Status.ARCHIVED);
-                    }
-                    return false;
-                })
-                .count());
-        dto.setRemainingTasks(dto.getTotalTasks() - dto.getCompletedTasks());
-
-        // 计算完成率
-        if (dto.getTotalTasks() > 0) {
-            dto.setCompletionRate((dto.getCompletedTasks() * 100.0) / dto.getTotalTasks());
+        if (goal.getCategory() != null) {
+            dto.setCategory(toCategoryDTO(goal.getCategory()));
+        } else {
+            dto.setCategory(null);
         }
+        // Set Subject info
+        if (goal.getSubject() != null) {
+            dto.setSubjectId(goal.getSubject().getId());
+            dto.setSubjectTitle(goal.getSubject().getTitle());
+        }
+        // 设置统计信息 (totalTasks and completedTasks are already in our GoalDTO definition
+        // via SubjectServiceImpl)
+        // For consistency, DTOConverter.toGoalDTO should populate them if this method
+        // is still used.
+        // My GoalDTO definition has totalTasks and completedTasks, so these setters are
+        // fine.
+        // The calculation logic here for completedTasks is different (ARCHIVED vs
+        // COMPLETED)
+        // and might need alignment with SubjectServiceImpl or GoalDTO's own
+        // calculation.
+        // For now, keeping DTOConverter's logic for its own toGoalDTO method.
+        if (goal.getTasks() != null) {
+            dto.setTotalTasks(goal.getTasks().size());
+            dto.setCompletedTasks((int) goal.getTasks().stream()
+                    .filter(t -> t.getStatus() != null && t.getStatus() == BaseTask.Status.COMPLETED) // Aligning to
+                                                                                                      // COMPLETED
+                    .count());
+        } else {
+            dto.setTotalTasks(0);
+            dto.setCompletedTasks(0);
+        }
+        // dto.setRemainingTasks(dto.getTotalTasks() - dto.getCompletedTasks()); //
+        // GoalDTO does not have remainingTasks
+        // dto.setCompletionRate(...); // GoalDTO does not have completionRate
 
-        // 收集所有标签 - 这里存储的是完整的Tag对象
-        dto.setTags(new ArrayList<>(goal.getTags()));
+        // 收集所有标签 - GoalDTO expects List<String> (tag names)
+        if (goal.getTags() != null) { // These are direct tags on Goal entity
+            dto.setTags(goal.getTags().stream().map(Tag::getName).collect(Collectors.toList()));
+        } else {
+            dto.setTags(new ArrayList<>());
+        }
 
         return dto;
     }
 
+    // This method converts an UpdateGoalRequest to a GoalDTO, which is unusual.
+    // Usually, a request DTO is converted to an entity.
+    // Assuming it's for some specific purpose.
     public static GoalDTO toGoalDTO(UpdateGoalRequest request) {
         if (request == null)
             return null;
         GoalDTO dto = new GoalDTO();
-        // 只设置UpdateGoalRequest中存在的字段
+        // Only set fields present in UpdateGoalRequest AND GoalDTO
         dto.setTitle(request.getTitle());
         dto.setStatus(request.getStatus());
         dto.setPriority(request.getPriority());
-        dto.setCategoryId(request.getCategoryId());
+        // dto.setCategoryId(request.getCategoryId()); // GoalDTO has 'CategoryDTO
+        // category', not 'Integer categoryId'
+        // UpdateGoalRequest has 'Integer categoryId'.
+        // This would require fetching Category and converting to CategoryDTO.
+        // Commenting out to fix compilation, service layer should handle this.
 
-        // 设置标签
-        dto.setTags(request.getTags());
-
+        // dto.setTags(request.getTags()); // UpdateGoalRequest (my definition) does not
+        // have getTags()
+        // If it were to have tags (e.g. List<String>), GoalDTO.setTags would expect
+        // List<String>
+        // Commenting out to fix compilation.
         return dto;
     }
 
@@ -360,6 +387,10 @@ public class DTOConverter {
         goal.setTitle(request.getTitle());
         goal.setStatus(request.getStatus());
         goal.setPriority(request.getPriority());
+        goal.setCompletionDate(request.getCompletionDate()); // Added
+        goal.setProgress(request.getProgress()); // Added
+        // categoryId from request would typically be handled in the service layer
+        // to fetch and set the Category entity on the Goal.
         return goal;
     }
 }

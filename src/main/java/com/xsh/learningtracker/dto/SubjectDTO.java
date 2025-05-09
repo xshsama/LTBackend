@@ -2,6 +2,7 @@ package com.xsh.learningtracker.dto;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import com.xsh.learningtracker.dto.GoalDTO;
 
 import lombok.Data;
 
@@ -20,9 +21,9 @@ public class SubjectDTO {
     private Double completionRate;
 
     // 关联数据
-    private CategoryDTO category;
+    private List<CategoryDTO> categories; // Changed to list to reflect ManyToMany
     private List<String> tags;
-    private List<TaskDTO> goals;
+    private List<GoalDTO> goals; // Changed to List<GoalDTO> to accurately represent Goals
 
     // 用于创建和更新的内部类
     @Data

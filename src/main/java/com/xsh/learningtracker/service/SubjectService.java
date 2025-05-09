@@ -13,9 +13,11 @@ public interface SubjectService {
 
     SubjectDTO getSubjectDTOById(Integer id);
 
-    Subject createSubject(Subject subject, Integer userId);
+    // Added categoryId parameter
+    Subject createSubject(Subject subject, Integer userId, Integer categoryId);
 
-    Subject updateSubject(Integer id, Subject subject);
+    // Added categoryId parameter
+    Subject updateSubject(Integer id, Subject subject, Integer categoryId);
 
     void deleteSubject(Integer id);
 

@@ -14,6 +14,14 @@ public interface TaskRepository extends JpaRepository<BaseTask, Integer> {
 
         List<BaseTask> findByGoalId(Integer goalId);
 
+        /**
+         * Counts the number of tasks associated with a specific goal.
+         * 
+         * @param goalId The ID of the goal.
+         * @return The total number of tasks for the given goal.
+         */
+        long countByGoalId(Integer goalId);
+
         List<BaseTask> findByGoalIdAndStatus(Integer goalId, BaseTask.Status status);
 
         List<BaseTask> findByGoalSubjectUserIdOrderByCreatedAtDesc(Integer userId);

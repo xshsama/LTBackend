@@ -1,11 +1,14 @@
 package com.xsh.learningtracker.util;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map; // Added import
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.type.TypeReference; // Added import
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xsh.learningtracker.dto.CategoryDTO;
 import com.xsh.learningtracker.dto.CreativeTaskDetailDTO;
@@ -182,6 +185,43 @@ public class DTOConverter {
             StepTaskDetailDTO detail = new StepTaskDetailDTO();
             detail.setCompletedSteps(stepTask.getCompletedSteps());
             detail.setBlockedSteps(stepTask.getBlockedSteps());
+
+            // Convert stepsJson to List<StepTaskDetailDTO.StepDTO>
+            if (stepTask.getStepsJson() != null && !stepTask.getStepsJson().isEmpty()) {
+                try {
+                    // First, deserialize stepsJson into List<StepTask.Step> (the entity's inner
+                    // class)
+                    TypeReference<List<StepTask.Step>> entityStepsTypeRef = new TypeReference<List<StepTask.Step>>() {
+                    };
+                    List<StepTask.Step> entitySteps = objectMapper.readValue(stepTask.getStepsJson(),
+                            entityStepsTypeRef);
+
+                    // Then, convert List<StepTask.Step> to List<StepTaskDetailDTO.StepDTO>
+                    List<StepTaskDetailDTO.StepDTO> dtoSteps = entitySteps.stream()
+                            .map(entityStep -> {
+                                StepTaskDetailDTO.StepDTO dtoStep = new StepTaskDetailDTO.StepDTO();
+                                dtoStep.setId(entityStep.getId());
+                                dtoStep.setTitle(entityStep.getTitle());
+                                dtoStep.setDescription(entityStep.getDescription());
+                                dtoStep.setStatus(entityStep.getStatus());
+                                if (entityStep.getOrder() != null) {
+                                    dtoStep.setOrder(entityStep.getOrder().intValue());
+                                }
+                                // validationScore is part of StepTaskDetailDTO.StepDTO but not StepTask.Step
+                                // It should be set if available from another source or handled accordingly.
+                                // dtoStep.setValidationScore(...);
+                                return dtoStep;
+                            })
+                            .collect(Collectors.toList());
+                    detail.setSteps(dtoSteps);
+                } catch (Exception e) {
+                    System.err.println(
+                            "Error parsing stepsJson for StepTask ID " + stepTask.getId() + ": " + e.getMessage());
+                    detail.setSteps(new ArrayList<>());
+                }
+            } else {
+                detail.setSteps(new ArrayList<>());
+            }
             dto.setStepTaskDetail(detail);
         } else if (task instanceof HabitTask) {
             HabitTask habitTask = (HabitTask) task;
@@ -191,6 +231,35 @@ public class DTOConverter {
             detail.setCurrentStreak(habitTask.getCurrentStreak());
             detail.setLongestStreak(habitTask.getLongestStreak());
             detail.setLastCompleted(habitTask.getLastCompleted());
+
+            // Convert checkinsJson to List<CheckInRecordDTO>
+            if (habitTask.getCheckinsJson() != null && !habitTask.getCheckinsJson().isEmpty()) {
+                try {
+                    // Deserialize the JSON string into a Map<String, HabitTask.CheckinRecord>
+                    TypeReference<Map<String, HabitTask.CheckinRecord>> typeRef = new TypeReference<Map<String, HabitTask.CheckinRecord>>() {
+                    };
+                    Map<String, HabitTask.CheckinRecord> checkinRecordsMap = objectMapper
+                            .readValue(habitTask.getCheckinsJson(), typeRef);
+
+                    // Convert the Map values (CheckinRecord) to List<CheckInRecordDTO>
+                    if (checkinRecordsMap != null) {
+                        List<HabitTaskDetailDTO.CheckInRecordDTO> recordDTOs = checkinRecordsMap.values().stream()
+                                .map(DTOConverter::toCheckInRecordDTO)
+                                .collect(Collectors.toList());
+                        detail.setCheckInRecords(recordDTOs);
+                    } else {
+                        detail.setCheckInRecords(new ArrayList<>());
+                    }
+                } catch (Exception e) {
+                    // Log error or handle
+                    System.err.println(
+                            "Error parsing checkinsJson for task ID " + habitTask.getId() + ": " + e.getMessage());
+                    detail.setCheckInRecords(new ArrayList<>());
+                }
+            } else {
+                detail.setCheckInRecords(new ArrayList<>());
+            }
+
             dto.setHabitTaskDetail(detail);
         } else if (task instanceof CreativeTask) {
             CreativeTask creativeTask = (CreativeTask) task;
@@ -254,7 +323,15 @@ public class DTOConverter {
                 // 设置默认的创作阶段，避免null值导致discriminator错误
                 ((CreativeTask) task).setCurrentPhase(CreativeTask.CreativePhase.DRAFTING);
                 if (request.getPublicationFormats() != null) {
-                    ((CreativeTask) task).setPublicationFormats(request.getPublicationFormats());
+                    Object pubFormatsObj = request.getPublicationFormats();
+                    if (pubFormatsObj instanceof String) {
+                        ((CreativeTask) task).setPublicationFormats((String) pubFormatsObj);
+                    } else if (pubFormatsObj instanceof List) {
+                        @SuppressWarnings("unchecked")
+                        List<String> formatsList = (List<String>) pubFormatsObj;
+                        ((CreativeTask) task).setPublicationFormats(String.join(",", formatsList));
+                    }
+                    // else, do nothing or log a warning if it's an unexpected type
                 }
                 if (request.getLicenseType() != null) {
                     ((CreativeTask) task).setLicenseType(request.getLicenseType());
@@ -367,6 +444,26 @@ public class DTOConverter {
         goal.setStatus(Goal.Status.NOT_STARTED);
         goal.setProgress(0);
         return goal;
+    }
+
+    // Helper method to convert HabitTask.CheckinRecord to
+    // HabitTaskDetailDTO.CheckInRecordDTO
+    private static HabitTaskDetailDTO.CheckInRecordDTO toCheckInRecordDTO(HabitTask.CheckinRecord record) {
+        if (record == null)
+            return null;
+        HabitTaskDetailDTO.CheckInRecordDTO dto = new HabitTaskDetailDTO.CheckInRecordDTO();
+        try {
+            if (record.getDate() != null) { // Ensure date string is not null
+                dto.setDate(java.time.LocalDate.parse(record.getDate())); // Assuming date is in ISO_DATE format
+            }
+        } catch (java.time.format.DateTimeParseException e) {
+            System.err.println("Error parsing date for check-in record: " + record.getDate() + " - " + e.getMessage());
+            // Handle error, e.g., set date to null or a default, or rethrow
+            dto.setDate(null);
+        }
+        dto.setStatus(record.getStatus());
+        dto.setNotes(record.getNotes());
+        return dto;
     }
 
     public static Category toCategory(CategoryDTO.CreateCategoryRequest request, Subject subject) {

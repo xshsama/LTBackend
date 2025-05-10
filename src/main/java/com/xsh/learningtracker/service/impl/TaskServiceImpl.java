@@ -1,13 +1,17 @@
 package com.xsh.learningtracker.service.impl;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter; // Added for date formatting
+import java.util.HashMap; // Added for check-in map
 import java.util.List;
+import java.util.Map; // Added for check-in map
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference; // Added for map deserialization
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xsh.learningtracker.entity.BaseTask;
 import com.xsh.learningtracker.entity.CreativeTask;
@@ -18,8 +22,11 @@ import com.xsh.learningtracker.repository.GoalRepository;
 import com.xsh.learningtracker.repository.TaskRepository;
 import com.xsh.learningtracker.service.TaskService;
 
+import lombok.extern.slf4j.Slf4j; // Added for logging
+
 @Service
 @Transactional
+@Slf4j // Added for logging
 public class TaskServiceImpl implements TaskService {
 
     @Autowired
@@ -365,5 +372,80 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public List<BaseTask> getTasksByGoalIdAndType(Integer goalId, BaseTask.TaskType type) {
         return taskRepository.findByGoalIdAndType(goalId, type);
+    }
+
+    @Override
+    public HabitTask performCheckIn(Integer taskId) {
+        BaseTask baseTask = getTaskById(taskId); // Uses existing method which throws if not found
+        if (!(baseTask instanceof HabitTask)) {
+            throw new IllegalArgumentException("Task with id: " + taskId + " is not a HabitTask.");
+        }
+        HabitTask habitTask = (HabitTask) baseTask;
+
+        LocalDate today = LocalDate.now();
+        LocalDate lastCompleted = habitTask.getLastCompleted();
+
+        // Check if already checked in today
+        if (lastCompleted != null && lastCompleted.isEqual(today)) {
+            log.warn("Habit task {} already checked in today.", taskId);
+            // Option 1: Throw exception
+            throw new IllegalStateException("Habit task " + taskId + " already checked in today.");
+            // Option 2: Silently do nothing and return the task
+            // return habitTask;
+        }
+
+        // --- Update Check-in Record ---
+        Map<String, HabitTask.CheckinRecord> checkins = new HashMap<>();
+        String checkinsJson = habitTask.getCheckinsJson();
+        if (checkinsJson != null && !checkinsJson.trim().isEmpty()) {
+            try {
+                // Define the type reference for deserialization
+                TypeReference<HashMap<String, HabitTask.CheckinRecord>> typeRef = new TypeReference<HashMap<String, HabitTask.CheckinRecord>>() {
+                };
+                checkins = objectMapper.readValue(checkinsJson, typeRef);
+            } catch (JsonProcessingException e) {
+                log.error("Error parsing checkinsJson for task " + taskId + ". JSON: " + checkinsJson, e);
+                throw new RuntimeException("Failed to parse check-in data for task " + taskId, e);
+            }
+        }
+
+        // Create and add today's record
+        HabitTask.CheckinRecord todayRecord = new HabitTask.CheckinRecord();
+        String todayStr = today.format(DateTimeFormatter.ISO_DATE); // YYYY-MM-DD format
+        todayRecord.setDate(todayStr);
+        todayRecord.setStatus(HabitTask.CheckinStatus.DONE); // Default to DONE
+        // todayRecord.setNotes(""); // Optional notes
+
+        checkins.put(todayStr, todayRecord);
+
+        // Serialize back to JSON
+        try {
+            habitTask.setCheckinsJson(objectMapper.writeValueAsString(checkins));
+        } catch (JsonProcessingException e) {
+            log.error("Error serializing checkinsJson for task " + taskId, e);
+            throw new RuntimeException("Failed to serialize check-in data for task " + taskId, e);
+        }
+
+        // --- Update Streaks (Simple daily logic) ---
+        int currentStreak = habitTask.getCurrentStreak() != null ? habitTask.getCurrentStreak() : 0;
+        int longestStreak = habitTask.getLongestStreak() != null ? habitTask.getLongestStreak() : 0;
+
+        if (lastCompleted != null && lastCompleted.isEqual(today.minusDays(1))) {
+            // Completed yesterday, increment streak
+            currentStreak++;
+        } else {
+            // Didn't complete yesterday (or first check-in), reset streak to 1
+            currentStreak = 1;
+        }
+
+        habitTask.setCurrentStreak(currentStreak);
+        habitTask.setLongestStreak(Math.max(longestStreak, currentStreak));
+
+        // --- Update Last Completed Date ---
+        habitTask.setLastCompleted(today);
+
+        // --- Save and Return ---
+        log.info("Habit task {} checked in for {}. Current streak: {}", taskId, todayStr, currentStreak);
+        return taskRepository.save(habitTask);
     }
 }

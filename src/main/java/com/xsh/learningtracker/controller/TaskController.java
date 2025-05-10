@@ -320,6 +320,29 @@ public class TaskController {
         return ResponseEntity.ok(DTOConverter.toTaskDTO(updatedTask));
     }
 
+    // 习惯任务打卡
+    @PostMapping("/{id}/check-in")
+    public ResponseEntity<TaskDTO> performHabitCheckIn(@PathVariable Integer id) {
+        logRequestHeaders("performHabitCheckIn for task id: " + id);
+        try {
+            HabitTask updatedTask = taskService.performCheckIn(id);
+            return ResponseEntity.ok(DTOConverter.toTaskDTO(updatedTask));
+        } catch (IllegalStateException e) {
+            // Handle cases like already checked in today
+            logger.warn("Check-in failed for task {}: {}", id, e.getMessage());
+            // Returning 409 Conflict might be appropriate
+            return ResponseEntity.status(409).body(null); // Or return DTO with error message
+        } catch (IllegalArgumentException e) {
+            // Handle cases like task not found or not a habit task
+            logger.error("Check-in failed for task {}: {}", id, e.getMessage());
+            return ResponseEntity.status(400).body(null); // Bad request
+        } catch (RuntimeException e) {
+            // Handle other potential errors (e.g., JSON processing)
+            logger.error("Check-in failed unexpectedly for task {}: {}", id, e.getMessage(), e);
+            return ResponseEntity.status(500).body(null); // Internal server error
+        }
+    }
+
     // ----- 创意型任务特有接口 -----
 
     // 更新创意任务阶段
@@ -482,7 +505,7 @@ public class TaskController {
      * 获取所有习惯型任务
      */
     @GetMapping("/habit")
-    public ResponseEntity<ApiResponse<List<HabitTaskDTO>>> getAllHabitTasks(
+    public ResponseEntity<ApiResponse<List<TaskDTO>>> getAllHabitTasks( // Changed return type to List<TaskDTO>
             org.springframework.security.core.Authentication authentication) {
         logRequestHeaders("getAllHabitTasks");
 
@@ -496,13 +519,12 @@ public class TaskController {
                 .filter(task -> task.getType() == BaseTask.TaskType.HABIT)
                 .collect(Collectors.toList());
 
-        // 转换为HabitTaskDTO
-        List<HabitTaskDTO> habitTaskDTOs = tasks.stream()
-                .map(task -> (HabitTask) task)
-                .map(this::convertToHabitTaskDTO)
+        // 转换为TaskDTO，这将使用我们修改过的DTOConverter
+        List<TaskDTO> taskDTOs = tasks.stream()
+                .map(DTOConverter::toTaskDTO) // Use DTOConverter.toTaskDTO
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(ApiResponse.success("获取习惯型任务成功", habitTaskDTOs));
+        return ResponseEntity.ok(ApiResponse.success("获取习惯型任务成功", taskDTOs)); // Return List<TaskDTO>
     }
 
     /**

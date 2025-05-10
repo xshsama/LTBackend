@@ -45,7 +45,7 @@ public class TaskDTO {
         private String customPattern;
 
         // 创意型任务特有字段
-        private String publicationFormats;
+        private Object publicationFormats; // Changed to Object to handle String or List
         private String licenseType;
     }
 

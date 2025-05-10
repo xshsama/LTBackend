@@ -50,6 +50,8 @@ public interface TaskService {
 
     HabitTask updateStreakInfo(Integer id);
 
+    HabitTask performCheckIn(Integer taskId); // Method for habit check-in
+
     // 创意型任务特有方法
     CreativeTask createCreativeTask(CreativeTask task, Integer goalId);
 

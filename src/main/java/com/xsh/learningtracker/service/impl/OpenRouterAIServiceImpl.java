@@ -81,12 +81,13 @@ public class OpenRouterAIServiceImpl implements AIService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", "Bearer " + apiKey);
-        if (httpReferer != null && !httpReferer.isEmpty()) {
-            headers.set("HTTP-Referer", httpReferer);
-        }
-        if (httpTitle != null && !httpTitle.isEmpty()) {
-            headers.set("X-Title", httpTitle);
-        }
+        // Temporarily comment out optional headers to isolate the issue
+        // if (httpReferer != null && !httpReferer.isEmpty()) {
+        // headers.set("HTTP-Referer", httpReferer);
+        // }
+        // if (httpTitle != null && !httpTitle.isEmpty()) {
+        // headers.set("X-Title", httpTitle);
+        // }
 
         Map<String, Object> message = new HashMap<>();
         message.put("role", "user");

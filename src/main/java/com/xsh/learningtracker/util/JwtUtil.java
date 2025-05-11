@@ -31,11 +31,12 @@ public class JwtUtil {
     @Value("${jwt.refresh-expiration:604800000}")
     private long refreshExpiration = 604800000; // 默认7天
 
-    public String generateToken(String username) {
+    public String generateToken(String username, Integer userId) { // Added userId parameter
         Date now = new Date();
         return Jwts.builder()
                 .claims()
                 .subject(username)
+                .add("userId", userId) // Added userId claim
                 .issuedAt(now)
                 .expiration(new Date(now.getTime() + expiration))
                 .and()
@@ -44,7 +45,9 @@ public class JwtUtil {
     }
 
     // 添加一个专门用于生成长期有效刷新令牌的方法
-    public String generateRefreshToken(String username) {
+    // Refresh token might also benefit from userId if it's used to re-issue access
+    // tokens with userId
+    public String generateRefreshToken(String username, Integer userId) { // Added userId parameter
         Date now = new Date();
         return Jwts.builder()
                 .claims()
@@ -67,9 +70,10 @@ public class JwtUtil {
                 throw new TokenRefreshException(token.substring(0, Math.min(10, token.length())) + "...", "令牌签名无效");
             }
 
-            // 从旧令牌中提取用户名（即使令牌已过期）
+            // 从旧令牌中提取用户名和用户ID（即使令牌已过期）
             String username = getUsernameFromToken(token);
-            logger.info("成功从令牌中提取用户名: {}, 准备刷新", username);
+            Integer userId = extractUserId(token); // Attempt to extract userId as well
+            logger.info("成功从令牌中提取用户名: {}, 用户ID: {}, 准备刷新", username, userId);
 
             // 检查令牌是否是刷新令牌（如果实现了刷新令牌机制）
             Claims claims = extractAllClaims(token);
@@ -78,28 +82,41 @@ public class JwtUtil {
             // 如果是刷新令牌，则生成访问令牌，否则直接刷新当前令牌
             if (isRefreshToken != null && isRefreshToken) {
                 logger.debug("使用刷新令牌生成新的访问令牌");
-                return generateToken(username);
+                if (userId == null) { // Fallback if userId couldn't be extracted from refresh token directly
+                    // This would require fetching userId from username via DB, or assuming refresh
+                    // token always has it
+                    // For simplicity, let's assume refresh token should also contain userId or this
+                    // path needs more logic
+                    logger.warn(
+                            "UserId not found in refresh token claims, cannot generate access token with userId directly from refresh token.");
+                    // Potentially throw an error or generate token without userId if allowed by
+                    // business logic
+                    // throw new TokenRefreshException(token, "Cannot re-issue access token without
+                    // userId from refresh token.");
+                    // Or, if username is enough for a new session:
+                    // return generateToken(username, null); // Or fetch userId based on username
+                }
+                return generateToken(username, userId); // Generate access token with userId
             } else {
                 logger.debug("刷新现有访问令牌");
-
                 // 获取剩余有效期，如果剩余有效期太短，生成全新令牌
                 long remainingTime = claims.getExpiration().getTime() - System.currentTimeMillis();
                 if (remainingTime < 600000) { // 少于10分钟
-                    return generateToken(username);
+                    return generateToken(username, userId);
                 }
-
                 // 生成新令牌
-                return generateToken(username);
+                return generateToken(username, userId);
             }
         } catch (ExpiredJwtException e) {
             // 对于过期令牌，我们仍然可以尝试刷新
-            logger.info("检测到令牌已过期，尝试从过期令牌中提取用户名并生成新令牌");
+            logger.info("检测到令牌已过期，尝试从过期令牌中提取用户信息并生成新令牌");
             String username = e.getClaims().getSubject();
-            if (username != null) {
-                logger.info("成功从过期令牌中提取用户名: {}, 正在生成新令牌", username);
-                return generateToken(username);
+            Integer userId = e.getClaims().get("userId", Integer.class); // Extract userId from expired token
+            if (username != null && userId != null) {
+                logger.info("成功从过期令牌中提取用户名: {}, 用户ID: {}, 正在生成新令牌", username, userId);
+                return generateToken(username, userId);
             } else {
-                logger.error("无法从过期令牌中提取用户名");
+                logger.error("无法从过期令牌中提取完整的用户信息 (username or userId is null)");
                 throw new TokenRefreshException(token.substring(0, Math.min(10, token.length())) + "...",
                         "令牌已过期且无法提取用户信息");
             }
@@ -153,6 +170,19 @@ public class JwtUtil {
             return e.getClaims().getSubject();
         } catch (Exception e) {
             logger.error("从令牌中提取用户名失败", e);
+            return null;
+        }
+    }
+
+    public Integer extractUserId(String token) {
+        try {
+            Claims claims = extractAllClaims(token);
+            return claims.get("userId", Integer.class);
+        } catch (ExpiredJwtException e) {
+            // Attempt to get userId even if token is expired, for refresh purposes
+            return e.getClaims().get("userId", Integer.class);
+        } catch (Exception e) {
+            logger.error("从令牌中提取用户ID失败", e);
             return null;
         }
     }

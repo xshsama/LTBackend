@@ -75,10 +75,18 @@ public class UserServiceImpl implements UserService {
                             request.getUsername(),
                             request.getPassword()));
 
-            String token = jwtUtil.generateToken(request.getUsername());
+            // Authentication successful, load user to get ID for token
+            User user = userRepository.findByUsername(request.getUsername())
+                    .orElseThrow(() -> new RuntimeException(
+                            "User not found after successful authentication: " + request.getUsername()));
+
+            String token = jwtUtil.generateToken(user.getUsername(), user.getId());
 
             // 获取用户的个人信息
-            UserProfileDTO userProfile = getUserProfile(request.getUsername());
+            // getUserProfile might also benefit from having the User object or userId
+            // directly
+            // For now, assuming it works with username
+            UserProfileDTO userProfile = getUserProfile(user.getUsername());
 
             // 返回包含令牌和用户信息的响应
             return new LoginResponseDTO(token, userProfile);

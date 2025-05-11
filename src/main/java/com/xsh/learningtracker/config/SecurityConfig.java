@@ -91,6 +91,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/goals/**").authenticated() // 更新目标需要认证
                         .requestMatchers(HttpMethod.DELETE, "/api/goals/**").authenticated() // 删除目标需要认证
                         .requestMatchers("/api/tasks/**").authenticated() // 保持这个规则
+                        .requestMatchers(HttpMethod.GET, "/api/reports/**").authenticated() // 获取任务相关信息需要认证
                         // .requestMatchers(HttpMethod.PUT, "/api/tasks/**").authenticated() //
                         // 暂时注释掉这条更具体的规则进行测试
                         .anyRequest().authenticated())

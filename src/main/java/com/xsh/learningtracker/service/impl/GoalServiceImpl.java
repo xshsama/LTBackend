@@ -27,9 +27,10 @@ public class GoalServiceImpl implements GoalService {
         Subject subject = subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new RuntimeException("Subject not found with id: " + subjectId));
         goal.setSubject(subject);
-        if (goal.getStatus() == null) {
-            goal.setStatus(Goal.Status.NOT_STARTED);
-        }
+        // The default status is set in the Goal entity itself.
+        // If a status is explicitly provided in the 'goal' object, it will be used.
+        // Otherwise, the default 'ONGOING' from the entity will be applied upon
+        // persistence.
         return goalRepository.save(goal);
     }
 
@@ -65,8 +66,9 @@ public class GoalServiceImpl implements GoalService {
     }
 
     @Override
-    public List<Goal> getGoalsBySubjectId(Integer subjectId) {
-        return goalRepository.findBySubjectId(subjectId);
+    public List<Goal> findBySubjectIdAndUserId(Integer subjectId, Integer userId) {
+        // 调用新的Repository方法，该方法通过Subject的ID和关联的User的ID来查找Goals
+        return goalRepository.findBySubject_IdAndSubject_User_IdOrderByCreatedAtDesc(subjectId, userId);
     }
 
     @Override

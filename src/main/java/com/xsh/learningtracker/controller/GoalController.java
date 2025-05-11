@@ -47,6 +47,19 @@ public class GoalController {
         return ResponseEntity.ok(goalDTOs);
     }
 
+    @GetMapping("/subject/{subjectId}")
+    public ResponseEntity<List<GoalDTO>> getGoalsBySubjectIdForCurrentUser(
+            @PathVariable Integer subjectId,
+            Authentication authentication) {
+        String username = authentication.getName();
+        Integer userId = userService.findByUsername(username).getId();
+        List<Goal> goals = goalService.findBySubjectIdAndUserId(subjectId, userId);
+        List<GoalDTO> goalDTOs = goals.stream()
+                .map(DTOConverter::toGoalDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(goalDTOs);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<GoalDTO> getGoal(@PathVariable Integer id) {
         Goal goal = goalService.getGoalById(id);

@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter; // Added for date formatting
 import java.util.HashMap; // Added for check-in map
 import java.util.List;
 import java.util.Map; // Added for check-in map
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,7 +46,7 @@ public class TaskServiceImpl implements TaskService {
                 .orElseThrow(() -> new RuntimeException("Goal not found with id: " + goalId));
         task.setGoal(goal);
         if (task.getStatus() == null) {
-            task.setStatus(BaseTask.Status.ACTIVE);
+            task.setStatus(BaseTask.Status.IN_PROGRESS); // Changed default to IN_PROGRESS
         }
         return taskRepository.save(task);
     }
@@ -109,12 +110,96 @@ public class TaskServiceImpl implements TaskService {
         BaseTask task = getTaskById(id);
         task.setStatus(status);
 
-        // 如果任务状态变为ARCHIVED，设置完成日期
-        if (status == BaseTask.Status.ARCHIVED) {
+        // 如果任务状态变为COMPLETED，设置完成日期
+        if (status == BaseTask.Status.COMPLETED) {
             task.setCompletionDate(LocalDate.now());
+        } else {
+            // 如果任务从COMPLETED变为其他状态，清除完成日期
+            if (task.getCompletionDate() != null && task.getStatus() != BaseTask.Status.COMPLETED) {
+                task.setCompletionDate(null);
+            }
         }
 
-        return taskRepository.save(task);
+        BaseTask savedTask = taskRepository.save(task);
+
+        // 检查并更新目标状态
+        if (savedTask.getStatus() == BaseTask.Status.COMPLETED && savedTask.getGoal() != null) {
+            checkAndUpdateGoalStatus(savedTask.getGoal());
+        }
+
+        return savedTask;
+    }
+
+    private void checkAndUpdateGoalStatus(Goal goal) {
+        if (goal == null) {
+            log.warn("Attempted to update status for a null goal.");
+            return;
+        }
+
+        // 重新从数据库获取最新的Goal对象，确保其tasks集合是最新的
+        Goal freshGoal = goalRepository.findById(goal.getId())
+                .orElseThrow(() -> new RuntimeException(
+                        "Goal not found with id: " + goal.getId() + " during status update."));
+
+        Set<BaseTask> tasks = freshGoal.getTasks();
+        int newProgress = 0;
+
+        if (tasks == null || tasks.isEmpty()) {
+            log.info("Goal {} (ID: {}) has no tasks. Setting progress to 0.", freshGoal.getTitle(), freshGoal.getId());
+            newProgress = 0; // 或根据业务逻辑设为100如果“无任务”等同于“完成”
+        } else {
+            int totalWeight = tasks.stream()
+                    .mapToInt(BaseTask::getWeight)
+                    .sum();
+            int completedWeight = tasks.stream()
+                    .filter(t -> t.getStatus() == BaseTask.Status.COMPLETED)
+                    .mapToInt(BaseTask::getWeight)
+                    .sum();
+
+            if (totalWeight > 0) {
+                newProgress = (int) Math.round(((double) completedWeight / totalWeight) * 100);
+            } else {
+                // 如果总权重为0，检查是否所有任务都已完成
+                boolean allTasksCompletedWithZeroWeight = tasks.stream()
+                        .allMatch(t -> t.getStatus() == BaseTask.Status.COMPLETED);
+                if (allTasksCompletedWithZeroWeight) {
+                    newProgress = 100;
+                } else {
+                    newProgress = 0;
+                }
+                log.info("Goal {} (ID: {}) has total task weight of 0. All tasks completed: {}. Progress set to {}.",
+                        freshGoal.getTitle(), freshGoal.getId(), allTasksCompletedWithZeroWeight, newProgress);
+            }
+        }
+
+        freshGoal.setProgress(newProgress);
+        log.info("Updating progress for Goal {} (ID: {}) to {}%", freshGoal.getTitle(), freshGoal.getId(), newProgress);
+
+        if (newProgress >= 100) {
+            if (freshGoal.getStatus() != Goal.Status.COMPLETED) {
+                log.info("Goal {} (ID: {}) reached 100% progress. Updating status to COMPLETED.",
+                        freshGoal.getTitle(), freshGoal.getId());
+                freshGoal.setStatus(Goal.Status.COMPLETED);
+                freshGoal.setCompletionDate(LocalDate.now());
+            }
+        } else {
+            // 如果进度小于100，但之前是COMPLETED，则改回ONGOING
+            if (freshGoal.getStatus() == Goal.Status.COMPLETED) {
+                log.info(
+                        "Goal {} (ID: {}) progress is now less than 100% but was COMPLETED. Updating status to ONGOING.",
+                        freshGoal.getTitle(), freshGoal.getId());
+                freshGoal.setStatus(Goal.Status.ONGOING); // 假设这是期望的行为
+                freshGoal.setCompletionDate(null); // 清除完成日期
+            }
+            // 如果目标状态不是EXPIRED，则可以考虑将其设置为ONGOING（如果之前不是）
+            // 但要小心，如果目标是手动设置为其他状态（如PAUSED，如果Goal有此状态），则不应覆盖
+            // 目前Goal的状态只有 ONGOING, COMPLETED, EXPIRED
+            // 如果不是COMPLETED且不是EXPIRED，则应为ONGOING
+            else if (freshGoal.getStatus() != Goal.Status.EXPIRED && freshGoal.getStatus() != Goal.Status.ONGOING) {
+                freshGoal.setStatus(Goal.Status.ONGOING);
+            }
+        }
+        goalRepository.save(freshGoal);
     }
 
     // 步骤型任务特有方法
@@ -125,7 +210,7 @@ public class TaskServiceImpl implements TaskService {
         task.setGoal(goal);
         task.setType(BaseTask.TaskType.STEP);
         if (task.getStatus() == null) {
-            task.setStatus(BaseTask.Status.ACTIVE);
+            task.setStatus(BaseTask.Status.IN_PROGRESS); // Changed default to IN_PROGRESS
         }
         return (StepTask) taskRepository.save(task);
     }
@@ -149,7 +234,11 @@ public class TaskServiceImpl implements TaskService {
             task.setTags(taskDetails.getTags());
         }
 
-        return (StepTask) taskRepository.save(task);
+        StepTask savedStepTask = (StepTask) taskRepository.save(task);
+        if (savedStepTask.getStatus() == BaseTask.Status.COMPLETED && savedStepTask.getGoal() != null) {
+            checkAndUpdateGoalStatus(savedStepTask.getGoal());
+        }
+        return savedStepTask;
     }
 
     @Override
@@ -189,7 +278,7 @@ public class TaskServiceImpl implements TaskService {
         task.setGoal(goal);
         task.setType(BaseTask.TaskType.HABIT);
         if (task.getStatus() == null) {
-            task.setStatus(BaseTask.Status.ACTIVE);
+            task.setStatus(BaseTask.Status.IN_PROGRESS); // Changed default to IN_PROGRESS
         }
         return (HabitTask) taskRepository.save(task);
     }
@@ -214,7 +303,11 @@ public class TaskServiceImpl implements TaskService {
             task.setTags(taskDetails.getTags());
         }
 
-        return (HabitTask) taskRepository.save(task);
+        HabitTask savedHabitTask = (HabitTask) taskRepository.save(task);
+        if (savedHabitTask.getStatus() == BaseTask.Status.COMPLETED && savedHabitTask.getGoal() != null) {
+            checkAndUpdateGoalStatus(savedHabitTask.getGoal());
+        }
+        return savedHabitTask;
     }
 
     @Override
@@ -253,7 +346,7 @@ public class TaskServiceImpl implements TaskService {
         task.setGoal(goal);
         task.setType(BaseTask.TaskType.CREATIVE);
         if (task.getStatus() == null) {
-            task.setStatus(BaseTask.Status.ACTIVE);
+            task.setStatus(BaseTask.Status.IN_PROGRESS); // Changed default to IN_PROGRESS
         }
         return (CreativeTask) taskRepository.save(task);
     }
@@ -280,7 +373,11 @@ public class TaskServiceImpl implements TaskService {
             task.setTags(taskDetails.getTags());
         }
 
-        return (CreativeTask) taskRepository.save(task);
+        CreativeTask savedCreativeTask = (CreativeTask) taskRepository.save(task);
+        if (savedCreativeTask.getStatus() == BaseTask.Status.COMPLETED && savedCreativeTask.getGoal() != null) {
+            checkAndUpdateGoalStatus(savedCreativeTask.getGoal());
+        }
+        return savedCreativeTask;
     }
 
     @Override

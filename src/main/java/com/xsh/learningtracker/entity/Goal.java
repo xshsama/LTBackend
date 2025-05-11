@@ -43,7 +43,7 @@ public class Goal {
     private String title;
 
     @Column(name = "status")
-    private Status status;
+    private Status status = Status.ONGOING;
 
     @Column(name = "completion_date")
     private LocalDate completionDate;
@@ -102,6 +102,6 @@ public class Goal {
     }
 
     public enum Status {
-        NOT_STARTED, ONGOING, COMPLETED, EXPIRED
+        ONGOING, COMPLETED, EXPIRED
     }
 }

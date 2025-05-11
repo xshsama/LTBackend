@@ -19,4 +19,7 @@ public interface GoalRepository extends JpaRepository<Goal, Integer> {
     List<Goal> findBySubjectUserIdOrderByCreatedAtDesc(Integer userId);
 
     List<Goal> findBySubjectUserIdAndStatus(Integer userId, Goal.Status status);
+
+    // Find goals by subject ID and also by the user ID associated with that subject
+    List<Goal> findBySubject_IdAndSubject_User_IdOrderByCreatedAtDesc(Integer subjectId, Integer userId);
 }

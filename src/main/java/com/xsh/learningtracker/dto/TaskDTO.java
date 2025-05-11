@@ -15,6 +15,7 @@ public class TaskDTO {
     private String title;
     private BaseTask.Status status;
     private BaseTask.TaskType type; // 任务类型：STEP, HABIT, CREATIVE
+    private Integer weight; // 任务权重
     private LocalDate completionDate;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -33,6 +34,7 @@ public class TaskDTO {
         private String title;
         private BaseTask.TaskType type = BaseTask.TaskType.STEP; // 默认为步骤型任务
         private Integer goalId;
+        private Integer weight; // 任务权重
         private List<Integer> tagIds;
         private String metadata; // JSON格式的元数据
 
@@ -55,6 +57,7 @@ public class TaskDTO {
         private String title;
         private BaseTask.Status status;
         private LocalDate completionDate;
+        private Integer weight; // 任务权重
         private List<Integer> tagIds;
         private String metadata;
 

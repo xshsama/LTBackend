@@ -174,6 +174,7 @@ public class DTOConverter {
         dto.setTitle(task.getTitle());
         dto.setStatus(task.getStatus());
         dto.setType(task.getType());
+        dto.setWeight(task.getWeight());
         dto.setCompletionDate(task.getCompletionDate());
         dto.setCreatedAt(task.getCreatedAt());
         dto.setUpdatedAt(task.getUpdatedAt());
@@ -344,10 +345,13 @@ public class DTOConverter {
 
         task.setTitle(request.getTitle());
         task.setType(request.getType());
+        if (request.getWeight() != null) {
+            task.setWeight(request.getWeight());
+        } // else it will use the default weight from BaseTask
         task.setGoal(goal);
 
         // 确保设置默认状态，防止discriminator值为空
-        task.setStatus(BaseTask.Status.ACTIVE);
+        task.setStatus(BaseTask.Status.IN_PROGRESS);
 
         return task;
     }
@@ -378,6 +382,10 @@ public class DTOConverter {
             if (request.getCompletionDate() != null) {
                 existingTask.setCompletionDate(request.getCompletionDate());
             }
+        }
+
+        if (request.getWeight() != null) {
+            existingTask.setWeight(request.getWeight());
         }
 
         // 根据具体任务类型设置特定字段 (只在提供时更新)
@@ -441,7 +449,7 @@ public class DTOConverter {
         goal.setPriority(request.getPriority());
         goal.setSubject(subject);
         goal.setCategory(category);
-        goal.setStatus(Goal.Status.NOT_STARTED);
+        goal.setStatus(Goal.Status.ONGOING);
         goal.setProgress(0);
         return goal;
     }

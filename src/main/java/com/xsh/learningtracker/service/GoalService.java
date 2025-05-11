@@ -14,9 +14,10 @@ public interface GoalService {
 
     Goal getGoalById(Integer id);
 
-    List<Goal> getGoalsBySubject(Subject subject);
+    List<Goal> getGoalsBySubject(Subject subject); // This might be unused or for a different purpose
 
-    List<Goal> getGoalsBySubjectId(Integer subjectId);
+    // Renamed and updated to include userId for proper authorization
+    List<Goal> findBySubjectIdAndUserId(Integer subjectId, Integer userId);
 
     List<Goal> getGoalsBySubjectIdAndStatus(Integer subjectId, Goal.Status status);
 

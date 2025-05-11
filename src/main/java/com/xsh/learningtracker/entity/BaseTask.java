@@ -50,10 +50,13 @@ public class BaseTask {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private Status status = Status.ACTIVE;
+    private Status status = Status.IN_PROGRESS; // Default status changed to IN_PROGRESS
 
     @Column(name = "completion_date")
     private LocalDate completionDate;
+
+    @Column(name = "weight", nullable = false)
+    private Integer weight = 1; // Default weight is 1
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -82,7 +85,7 @@ public class BaseTask {
 
     // 通用的任务状态枚举
     public enum Status {
-        ACTIVE, ARCHIVED, BLOCKED, COMPLETED, IN_PROGRESS, NOT_STARTED, OVERDUE, PAUSED
+        ARCHIVED, BLOCKED, COMPLETED, IN_PROGRESS, NOT_STARTED, OVERDUE, PAUSED // ACTIVE removed
     }
 
     // 任务类型枚举

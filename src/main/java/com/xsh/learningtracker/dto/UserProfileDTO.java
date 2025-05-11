@@ -6,6 +6,7 @@ import lombok.Data;
 
 @Data
 public class UserProfileDTO {
+    private Integer id; // 将用户ID字段类型修改为Integer
     private String username; // 来自 User
     private String nickname; // 来自 UserInfo
     private String avatar; // 来自 UserInfo

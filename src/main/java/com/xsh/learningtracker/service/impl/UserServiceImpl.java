@@ -182,6 +182,7 @@ public class UserServiceImpl implements UserService {
     private UserProfileDTO convertToProfileDTO(User user, UserInfo userInfo) {
         UserProfileDTO dto = new UserProfileDTO();
 
+        dto.setId(user.getId()); // 设置用户ID
         dto.setUsername(user.getUsername());
         // 避免设置null值
         dto.setNickname(userInfo.getNickname() != null ? userInfo.getNickname() : user.getUsername());

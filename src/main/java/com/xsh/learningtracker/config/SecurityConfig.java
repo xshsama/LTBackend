@@ -85,6 +85,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/tags/**").authenticated() // 修改标签需要认证
                         .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll() // 允许获取分类
                         .requestMatchers(HttpMethod.POST, "/api/categories/**").authenticated() // 修改分类需要认证
+                        // 添加 Goals API 的安全配置
+                        .requestMatchers(HttpMethod.GET, "/api/goals/**").authenticated() // 获取目标相关信息需要认证
+                        .requestMatchers(HttpMethod.POST, "/api/goals/**").authenticated() // 创建目标需要认证
+                        .requestMatchers(HttpMethod.PUT, "/api/goals/**").authenticated() // 更新目标需要认证
+                        .requestMatchers(HttpMethod.DELETE, "/api/goals/**").authenticated() // 删除目标需要认证
                         .requestMatchers("/api/tasks/**").authenticated() // 保持这个规则
                         // .requestMatchers(HttpMethod.PUT, "/api/tasks/**").authenticated() //
                         // 暂时注释掉这条更具体的规则进行测试
